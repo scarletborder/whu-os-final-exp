@@ -11,6 +11,7 @@
 #define	EXTERN
 #endif
 
+
 EXTERN	int	ticks;
 
 EXTERN	int	disp_pos;
@@ -56,6 +57,9 @@ EXTERN	MESSAGE			fs_msg;
 EXTERN	struct proc *		pcaller;
 EXTERN	struct inode *		root_inode;
 extern	struct dev_drv_map	dd_map[];
+
+/* For shell use */
+EXTERN char Working_Directory[BYTES_SHELL_WORKING_DIRECTORY];
 
 /* for test only */
 extern	char *			logbuf;

@@ -48,6 +48,7 @@ PUBLIC int do_stat()
 	pathname[name_len] = 0;	/* terminate the string */
 
 	int inode_nr = search_file(pathname);
+	DEBUG_PRINT("do_stat", "1 searchfile success");
 	if (inode_nr == INVALID_INODE) {	/* file not found */
 		printl("{FS} FS::do_stat():: search_file() returns "
 		       "invalid inode: %s\n", pathname);
@@ -204,7 +205,10 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 		      struct inode** ppinode)
 {
 	const char * s = pathname;
-	char * cur_entry_name = filename; // 目前的entry名字(可能是file or dir)
+
+	// 目前的entry名字(可能是file or dir)
+	// 用作暂时的buffer
+	char * cur_entry_name = filename; 
 	struct inode* curDirInode = root_inode;
 	u8 IsRootDir = 1;
 
@@ -218,19 +222,26 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 
 	while (*s) {		/* check each character */
 		if (*s == '/'){
+			// filename[-1] = 0
+			*cur_entry_name = 0;
 			// 根据当前的entry name找inode
 			int next_dir_inode_nr = low_search_entry(curDirInode, filename);
 			if (next_dir_inode_nr == INVALID_INODE) return -1;
 			int cur_dev = curDirInode->i_dev;
 			if (IsRootDir == 0) put_inode(curDirInode); // 先前的dir不需要再引用了
 			curDirInode = get_inode(cur_dev, next_dir_inode_nr);
+			
+			// buffer指针重新回到开头
 			cur_entry_name = filename;
 		}
 		*cur_entry_name++ = *s++;
 		/* if filename is too long, just truncate it */
 		if (cur_entry_name - filename >= MAX_FILENAME_LEN)
-			break;
+			break;	
 	}
+	// loop finished, when the final curDirInode is the dir inode of the file
+	// cur_entry_name is the file's name
+
 	*cur_entry_name = 0;
 
 	*ppinode = curDirInode;

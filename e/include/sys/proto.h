@@ -87,6 +87,7 @@ PUBLIC struct super_block *	get_super_block(int dev);
 
 /* fs/open.c */
 PUBLIC int		do_open();
+PUBLIC int		do_mkdir();
 PUBLIC int		do_close();
 
 /* fs/read_write.c */

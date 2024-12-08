@@ -1,3 +1,5 @@
+// clang-format off
+
 /*************************************************************************//**
  *****************************************************************************
  * @file   misc.c
@@ -19,6 +21,10 @@
 #include "global.h"
 #include "keyboard.h"
 #include "proto.h"
+
+#ifndef NULL
+#define NULL 0
+#endif
 
 /*****************************************************************************
  *                                send_recv
@@ -161,6 +167,82 @@ PUBLIC void spin(char * func_name)
 	while (1) {}
 }
 
+char *strchr(const char *str, int c) {
+    // 遍历字符串，查找字符 c
+    while (*str != '\0') {
+        if (*str == c) {
+            return (char *)str;  // 找到字符 c，返回当前字符的地址
+        }
+        str++;  // 移动到下一个字符
+    }
+    
+    // 如果没有找到字符 c，返回 NULL
+    return NULL;
+}
+
+/**
+ * strtok
+ */
+char *strtok(char *str, const char *delim) {
+    static char *next_token = NULL;  // 保存上次分割的位置
+
+    if (str != NULL) {
+        // 如果是第一次调用，初始化
+        next_token = str;
+    }
+
+    if (next_token == NULL) {
+        return NULL;  // 如果没有可分割的字符串，则返回 NULL
+    }
+
+    // 跳过分隔符
+    char *start = next_token;
+    while (*start && strchr(delim, *start)) {
+        start++;  // 跳过前导的分隔符
+    }
+
+    if (*start == '\0') {
+        next_token = NULL;  // 如果已经到达字符串的结尾，返回 NULL
+        return NULL;
+    }
+
+    // 查找下一个分隔符
+    char *end = start;
+    while (*end && !strchr(delim, *end)) {
+        end++;  // 查找当前子字符串的结束
+    }
+
+    if (*end == '\0') {
+        // 如果已经到达字符串的末尾，更新 next_token 为 NULL
+        next_token = NULL;
+    } else {
+        // 否则，将分隔符替换为 '\0'
+        *end = '\0';
+        next_token = end + 1;
+    }
+
+    return start;  // 返回当前子字符串
+}
+
+/**
+ * strcpy
+ */
+char *_strcpy(char *dest, char *src) {
+    // 用指针逐个复制字符
+    char *d = dest;
+
+    // 逐个字符复制，直到遇到字符串结束符 '\0'
+    while (*src != '\0') {
+        *d = *src;  // 复制当前字符
+        d++;         // 移动目标指针
+        src++;       // 移动源指针
+    }
+
+    // 复制结束符 '\0'
+    *d = '\0';
+
+    return dest;  // 返回目标字符串的起始地址
+}
 
 /*****************************************************************************
  *                           assertion_failure

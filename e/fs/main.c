@@ -56,6 +56,9 @@ PUBLIC void task_fs() {
 		case OPEN:
 			fs_msg.FD = do_open();
 			break;
+		case MKDIR:
+			fs_msg.FD = do_mkdir();
+			break;
 		case CLOSE:
 			fs_msg.RETVAL = do_close();
 			break;
@@ -90,6 +93,7 @@ PUBLIC void task_fs() {
 #ifdef ENABLE_DISK_LOG
 		char *msg_name[128];
 		msg_name[OPEN]   = "OPEN";
+		msg_name[MKDIR]	 = "MKDIR";
 		msg_name[CLOSE]  = "CLOSE";
 		msg_name[READ]   = "READ";
 		msg_name[WRITE]  = "WRITE";

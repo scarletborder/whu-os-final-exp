@@ -1,5 +1,11 @@
 {
     "files.associations": {
-        "global.h": "c"
+        "global.h": "c",
+        "tty.h": "c",
+        "unistd.h": "c",
+        "protect.h": "c",
+        "proto.h": "c",
+        "proc.h": "c",
+        "fs.h": "c"
     }
 }

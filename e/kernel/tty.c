@@ -163,6 +163,7 @@ PUBLIC void in_process(TTY* tty, u32 key)
 	}
 	else {
 		int raw_code = key & MASK_RAW;
+		// printl("%x", raw_code);
 		switch(raw_code) {
 		case ENTER:
 			put_key(tty, '\n');
@@ -177,11 +178,16 @@ PUBLIC void in_process(TTY* tty, u32 key)
 			}
 			break;
 		case DOWN:
+			// printl("press down");
 			if ((key & FLAG_SHIFT_L) ||
 			    (key & FLAG_SHIFT_R)) {	/* Shift + Down */
 				scroll_screen(tty->console, SCR_UP);
 			}
 			break;
+
+		/** TODO: 切换tty
+		 * Since alt + FN will invoke ubuntu's trigger, our fork os will change to another keybinds
+		 */
 		case F1:
 		case F2:
 		case F3:
@@ -191,13 +197,13 @@ PUBLIC void in_process(TTY* tty, u32 key)
 		case F7:
 		case F8:
 		case F9:
-		case F10:
-		case F11:
-		case F12:
-			if ((key & FLAG_ALT_L) ||
-			    (key & FLAG_ALT_R)) {	/* Alt + F1~F12 */
+			// printl("press FN");
+			// TODO: alt 不行,和ubuntu冲突
+			// if ((key & FLAG_ALT_L) ||
+			//     (key & FLAG_ALT_R)) {	/* Alt + PAD1~12 */
+				// printl("switch");
 				select_console(raw_code - F1);
-			}
+			// }
 			break;
 		default:
 			break;

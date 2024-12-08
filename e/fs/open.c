@@ -26,8 +26,10 @@
 #include "proto.h"
 
 PRIVATE struct inode * create_file(char * path, int flags);
+PRIVATE struct inode * create_dir(char * path, int flags);
 PRIVATE int alloc_imap_bit(int dev);
 PRIVATE int alloc_smap_bit(int dev, int nr_sects_to_alloc);
+PRIVATE struct inode * new_inode_custom(int dev, int inode_nr, u32 imode,int start_sect, u32 nr_sects);
 PRIVATE struct inode * new_inode(int dev, int inode_nr, int start_sect);
 PRIVATE void new_dir_entry(struct inode * dir_inode, int inode_nr, char * filename);
 
@@ -77,6 +79,7 @@ PUBLIC int do_open()
 
 	struct inode * pin = 0; // first inode of this file
 	if (flags & O_CREAT) {
+		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
 		if (inode_nr) {
 			printl("{FS} file exists.\n");
 			return -1;
@@ -84,6 +87,7 @@ PUBLIC int do_open()
 		else {
 			pin = create_file(pathname, flags);
 		}
+		// 
 	}
 	else { // load an existed file's inode
 		assert(flags & O_RDWR);
@@ -134,6 +138,37 @@ PUBLIC int do_open()
 	return fd;
 }
 
+int do_mkdir(){
+	int fd = -1;		/* return value */
+
+	char pathname[MAX_PATH];
+
+	/* get parameters from the message */
+	int flags = fs_msg.FLAGS;	/* access mode */
+	int name_len = fs_msg.NAME_LEN;	/* length of filename */
+	int src = fs_msg.source;	/* caller proc nr. */
+	assert(name_len < MAX_PATH);
+	phys_copy((void*)va2la(TASK_FS, pathname),
+		  (void*)va2la(src, fs_msg.PATHNAME),
+		  name_len);
+	pathname[name_len] = 0;
+
+	int inode_nr = search_file(pathname);
+
+	struct inode * pin = 0; // first inode of this file
+	if (flags & O_CREAT) {
+		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
+		if (inode_nr) {
+			printl("{FS} dir exists.\n");
+			return -1;
+		}
+		else {
+			pin = create_dir(pathname, flags);
+		}
+		// 
+	}
+}
+
 /*****************************************************************************
  *                                create_file
  *****************************************************************************/
@@ -152,14 +187,54 @@ PRIVATE struct inode * create_file(char * path, int flags)
 {
 	char filename[MAX_PATH];
 	struct inode * dir_inode;
+
+	printl("{fslog} path:%s", path);
+
 	if (strip_path(filename, path, &dir_inode) != 0)
 		return 0;
+
+	printl("{fslog} stage 'create_file': filename:%s, dir_inode:%d", filename, dir_inode->i_num);
 
 	int inode_nr = alloc_imap_bit(dir_inode->i_dev);
 	int free_sect_nr = alloc_smap_bit(dir_inode->i_dev,
 					  NR_DEFAULT_FILE_SECTS);
 	struct inode *newino = new_inode(dir_inode->i_dev, inode_nr,
 					 free_sect_nr);
+
+	new_dir_entry(dir_inode, newino->i_num, filename);
+
+	return newino;
+}
+
+/*****************************************************************************
+ *                                create_dir
+ *****************************************************************************/
+/**
+ * Create a directory and return it's inode ptr.
+ *
+ * @param[in] path   The full path of the new file
+ * @param[in] flags  Attribiutes of the new file
+ *
+ * @return           Ptr to i-node of the new file if successful, otherwise 0.
+ * 
+ * @see open()
+ * @see do_open()
+ *****************************************************************************/
+PRIVATE struct inode * create_dir(char * path, int flags)
+{
+	char filename[MAX_PATH];
+	struct inode * dir_inode;
+
+	printl("{fslog} path:%s", path);
+
+	if (strip_path(filename, path, &dir_inode) != 0)
+		return 0;
+
+	printl("{fslog} stage 'create_dir': dirname:%s, parent_inode:%d", filename, dir_inode->i_num);
+
+	int inode_nr = alloc_imap_bit(dir_inode->i_dev);
+	int free_sect_nr = alloc_smap_bit(dir_inode->i_dev, NR_DEFAULT_FILE_SECTS);
+	struct inode *newino = new_inode_custom(dir_inode->i_dev, inode_nr, I_DIRECTORY, free_sect_nr, NR_DEFAULT_FILE_SECTS);
 
 	new_dir_entry(dir_inode, newino->i_num, filename);
 
@@ -343,10 +418,10 @@ PRIVATE int alloc_smap_bit(int dev, int nr_sects_to_alloc)
 }
 
 
-PRIVATE struct inode * new_inode_custom(int dev, int inode_nr, int start_sect, u32 nr_sects) {
+PRIVATE struct inode * new_inode_custom(int dev, int inode_nr, u32 imode,int start_sect, u32 nr_sects) {
 	struct inode * new_inode = get_inode(dev, inode_nr);
 
-	new_inode->i_mode = I_REGULAR;
+	new_inode->i_mode = imode;
 	new_inode->i_size = 0;
 	new_inode->i_start_sect = start_sect;
 	new_inode->i_nr_sects = nr_sects;
@@ -366,7 +441,7 @@ PRIVATE struct inode * new_inode_custom(int dev, int inode_nr, int start_sect, u
  *                                new_inode
  *****************************************************************************/
 /**
- * Generate a new i-node and write it to disk.
+ * Generate a new i-node(file) and write it to disk.
  * 
  * @param dev  Home device of the i-node.
  * @param inode_nr  I-node nr.
@@ -376,8 +451,10 @@ PRIVATE struct inode * new_inode_custom(int dev, int inode_nr, int start_sect, u
  *****************************************************************************/
 PRIVATE struct inode * new_inode(int dev, int inode_nr, int start_sect)
 {
-	return new_inode_custom(dev, inode_nr, start_sect, NR_DEFAULT_FILE_SECTS);
+	return new_inode_custom(dev, inode_nr, I_REGULAR, start_sect, NR_DEFAULT_FILE_SECTS);
 }
+
+
 
 
 /*****************************************************************************

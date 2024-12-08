@@ -114,6 +114,7 @@ PUBLIC int sprintf(char *buf, const char *fmt, ...);
 
 /* lib/open.c */
 PUBLIC int open(const char *pathname, int flags);
+PUBLIC int mkdir(const char *pathname, int flags);
 
 /* lib/close.c */
 PUBLIC int close(int fd);
@@ -154,3 +155,10 @@ PUBLIC int stat(const char *path, struct stat *buf);
 PUBLIC int syslog(const char *fmt, ...);
 
 #endif /* _ORANGES_STDIO_H_ */
+
+
+#ifndef DEBUG_PRINT
+#define DEBUG_PRINT(stage,str) \
+		printl("{STAGE} %s INFO: %s\n", stage, str)
+		
+#endif

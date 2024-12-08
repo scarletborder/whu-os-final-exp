@@ -109,9 +109,9 @@ PUBLIC int do_rdwt()
 		u64 end_sector = pos_end >> SECTOR_SIZE_SHIFT;
 
 		u64 traveled_sector = 0;
-		struct inode* traverse_node = pin;
+		traverse_node = pin;
 
-		// TODO:先找到开始的那个inode
+		// 先找到开始的那个inode
 		while (1) {
 			if (traveled_sector + traverse_node->i_nr_sects >= start_sector) {
 				break;
