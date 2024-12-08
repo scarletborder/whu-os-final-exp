@@ -59,7 +59,7 @@ PUBLIC int execl(const char *path, const char *arg, ...)
  *****************************************************************************/
 PUBLIC int execv(const char *path, char * argv[])
 {
-	DEBUG_PRINT("execv", "\nhello\n");
+	// DEBUG_PRINT("execv", "\nhello\n");
 	char **p = argv;
 	char arg_stack[PROC_ORIGIN_STACK];
 	int stack_len = 0;

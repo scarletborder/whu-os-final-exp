@@ -12,7 +12,7 @@ typedef struct {
 } DIR;
 
 struct dirent {
-	char filename[13];
+	char *filename;
 	u32 i_mode;
 	u32 i_size;
 };

@@ -36,8 +36,16 @@ int main(int argc, char *argv[]) {
 		printf("No directory in path\n");
 	}
 
+	if (dir[0] == '\0') {
+		dir[0] = '/';
+		dir[1] = '\0';
+	}
+
 	DIR d;               // 目录结构体
 	struct dirent entry; // 当前目录项
+
+	char buff[13]  = {"\0"};
+	entry.filename = buff;
 	int ret;
 
 	// 打开目录
@@ -47,15 +55,21 @@ int main(int argc, char *argv[]) {
 		return;
 	}
 
+	// printf("fd: %d\n", d.fd);
+
 	// 遍历并打印目录中的所有文件名
 	while (1) {
 		// 读取下一个目录项
 		readdir(&d, &entry);
 
+		
+
 		// 如果没有更多目录项，退出循环
 		if (entry.filename[0] == '\0') {
 			break;
 		}
+
+		printf("\n%d:%s,m=0x%x\n", i, entry.filename, entry.i_mode);
 
 		// 打印文件名
 		printf("%s\n", entry.filename);

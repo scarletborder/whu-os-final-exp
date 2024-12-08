@@ -60,6 +60,7 @@ PUBLIC void task_fs() {
 			fs_msg.FD = do_mkdir();
 			break;
 		case LIST:
+			
 			do_List_Dir();
 			break;
 		case CLOSE:
@@ -102,10 +103,13 @@ PUBLIC void task_fs() {
 		msg_name[WRITE]  = "WRITE";
 		msg_name[LSEEK]  = "LSEEK";
 		msg_name[UNLINK] = "UNLINK";
+		msg_name[MKDIR] = "MKDIR";
+		msg_name[LIST] = "LIST";
 		/* msg_name[FORK]   = "FORK"; */
 		/* msg_name[EXIT]   = "EXIT"; */
-		/* msg_name[STAT]   = "STAT"; */
+		msg_name[STAT]   = "STAT"; 
 
+	// TODO: 防assert
 		switch (msgtype) {
 		case UNLINK:
 			dump_fd_graph("%s just finished. (pid:%d)", msg_name[msgtype], src);
@@ -116,7 +120,9 @@ PUBLIC void task_fs() {
 		case WRITE:
 		case FORK:
 		case EXIT:
-		/* case LSEEK: */
+		case LSEEK:
+		case LIST:
+		case MKDIR:
 		case STAT:
 			break;
 		case RESUME_PROC:
