@@ -222,3 +222,20 @@ PUBLIC int do_unlink()
 
 	return 0;
 }
+
+
+PUBLIC u64	getsize(struct inode* first){
+	if (first == 0){
+		return 0;
+	}
+	u64 ret = first->i_size;
+	while (1) {
+		if (first->i_next_node == INVALID_INODE) {
+			break;
+		}
+		first = get_inode_directly(first->i_dev, first->i_next_node);
+		ret += first->i_size;
+	}
+
+	return ret;
+}

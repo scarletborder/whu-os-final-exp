@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # 进入 command 目录并执行 make install
 cd command
 echo -e "stage1: clean command\n"

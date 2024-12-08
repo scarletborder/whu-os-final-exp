@@ -290,6 +290,7 @@ void shabby_shell(const char *tty_name) {
 				wait(&s);
 			} else { /* child */
 				printf("[shell] now exec %s \n", full_path);
+				argv[0] = full_path;
 				execv(full_path, argv); // 没有透传full_path
 			}
 		}

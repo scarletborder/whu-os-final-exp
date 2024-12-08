@@ -12,6 +12,7 @@
 /* Orange'S FS */
 
 #include "type.h"
+#include "mdirent.h"
 #include "stdio.h"
 #include "const.h"
 #include "protect.h"
@@ -90,7 +91,7 @@ PUBLIC int do_stat()
 	return 0;
 }
 
-
+int last_query_dev = -1;
 
 /**
  * low_search_entry
@@ -121,8 +122,11 @@ PUBLIC int low_search_entry(struct inode* dir_inode, char *entryName){
 		RD_SECT(dir_inode->i_dev, dir_blk0_nr + i);
 		pde = (struct dir_entry *)fsbuf;
 		for (j = 0; j < SECTOR_SIZE / DIR_ENTRY_SIZE; j++,pde++) {
-			if (memcmp(entryName, pde->name, MAX_FILENAME_LEN) == 0)
+			if (memcmp(entryName, pde->name, MAX_FILENAME_LEN) == 0) {
+				last_query_dev = dir_inode->i_dev;
 				return pde->inode_nr;
+			}
+				
 			if (++m > nr_dir_entries)
 				break;
 		}
@@ -169,6 +173,82 @@ PUBLIC int search_file(char * path)
 	}
 
 	return nr;
+}
+
+/** List_Dir
+ * 
+ * Modified from `low_search_file`. 
+ * 
+ * Used for `ls` which will enumerate all entry in the dir
+ * except paired to specified name.
+ * 
+ */
+PUBLIC void do_List_Dir() {
+	int fd = fs_msg.u.m3.m3i1;
+	int i = fs_msg.u.m3.m3i2;
+	int j = fs_msg.u.m3.m3i3;
+	int dev = fs_msg.u.m3.m3i4;
+	int m = fs_msg.u.m3.m3l1;
+	struct dirent* dirent_out = (struct dirent*)fs_msg.u.m3.m3p1;
+	// msg.u.m3.m3p1 这个是想要返回的dirent
+	/*
+	struct dirent {
+	char *filename;
+	u32 i_mode;
+	u32 i_size;
+};
+	 */
+	struct inode* dir_inode = pcaller->filp[fd]->fd_inode;	
+	/**
+	 * Search the dir for the entry.
+	 */
+	int dir_blk0_nr = dir_inode->i_start_sect;
+	int nr_dir_blks = (dir_inode->i_size + SECTOR_SIZE - 1) / SECTOR_SIZE;
+	int nr_dir_entries =
+	  dir_inode->i_size / DIR_ENTRY_SIZE; /**
+					       * including unused slots
+					       * (the file has been deleted
+					       * but the slot is still there)
+					       */
+	struct dir_entry * pde;
+
+	 // 遍历目录块
+    for (; i < nr_dir_blks; i++) {
+        // 读取当前块内容
+        RD_SECT(dir_inode->i_dev, dir_blk0_nr + i);
+        pde = (struct dir_entry *)fsbuf;  // 将当前块的内容指针转化为目录项指针
+
+        // 遍历当前块中的目录项
+        for (; j < SECTOR_SIZE / DIR_ENTRY_SIZE; j++, pde++) {
+            // 如果遍历到的目录项数大于总目录项数，则结束
+            if (++m > nr_dir_entries)
+                break;
+
+            // 将目录项信息填充到 dirent_out 中
+			_strcpy(dirent_out->filename, pde->name);
+			struct inode* tmp_node = get_inode_directly(dev, pde->inode_nr);
+
+            dirent_out->i_mode = tmp_node->i_mode;      // 文件模式
+            dirent_out->i_size = getsize(tmp_node);      // 文件大小
+
+            // 更新索引
+            fs_msg.u.m3.m3i2 = i;  // 当前块索引
+            fs_msg.u.m3.m3i3 = j;  // 当前目录项索引
+
+            // 返回当前目录项
+			fs_msg.u.m3.m3l1 = m;
+            return;
+        }
+
+        // 如果已经遍历完当前块中的所有目录项，继续遍历下一个块
+        if (m > nr_dir_entries) /* all entries have been iterated */
+            break;
+    }
+
+    // 如果遍历完成，返回
+	dirent_out->filename[0] = '\0';
+	fs_msg.u.m3.m3l1 = m;
+    return;
 }
 
 /*****************************************************************************

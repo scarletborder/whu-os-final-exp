@@ -59,6 +59,9 @@ PUBLIC void task_fs() {
 		case MKDIR:
 			fs_msg.FD = do_mkdir();
 			break;
+		case LIST:
+			do_List_Dir();
+			break;
 		case CLOSE:
 			fs_msg.RETVAL = do_close();
 			break;

@@ -1,0 +1,15 @@
+rm -f echo pwd *.o
+gcc -I ../include/ -c -fno-builtin -fno-stack-protector -Wall -o echo.o echo.c
+nasm -I ../include/ -f elf -o start.o start.asm
+ld -Ttext 0x1000 -o echo echo.o start.o ../lib/orangescrt.a
+gcc -I ../include/ -c -fno-builtin -fno-stack-protector -Wall -o pwd.o pwd.c
+ld -Ttext 0x1000 -o pwd pwd.o start.o ../lib/orangescrt.a
+rm -f *.o
+cp ../kernel.bin ./ -v
+'../kernel.bin' -> './kernel.bin'
+tar vcf inst.tar kernel.bin echo pwd
+kernel.bin
+echo
+pwd
+dd if=inst.tar of=../80m.img seek=`echo "obase=10;ibase=16;(\`egrep -e '^ROOT_BASE' ../boot/include/load.inc | sed -e 's/.*0x//g'\`+\`egrep -e '#define[[:space:]]*INSTALL_START_SECT' ../include/sys/config.h | sed -e 's/.*0x//g'\`)*200" | bc` bs=1 count=`ls -l inst.tar | awk -F " " '{print $5}'` conv=notrunc
+Makefile:24: recipe for target 'install' failed
