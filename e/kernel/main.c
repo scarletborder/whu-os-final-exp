@@ -268,9 +268,12 @@ void shabby_shell(const char *tty_name) {
 			p++;
 		} while (ch);
 		argv[argc] = 0;
+		DEBUG_PRINT("shell", "argc %d", argc);
 
+		if (argc == 0)
+			continue;
 		char *full_path = get_full_path(argv[0]);
-		printf("[shell] want to exec %s \n", full_path);
+		// printf("[shell] want to exec %s \n", full_path);
 		int fd = open(full_path, O_RDWR);
 		if (fd == -1) {
 			if (rdbuf[0]) {
@@ -280,7 +283,7 @@ void shabby_shell(const char *tty_name) {
 			}
 		} else {
 			int ok = close(fd);
-			printf("ok %d\n", ok);
+			// printf("ok %d\n", ok);
 			int pid = fork();
 			if (pid != 0) { /* parent */
 				int s;

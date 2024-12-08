@@ -59,6 +59,7 @@ PUBLIC int execl(const char *path, const char *arg, ...)
  *****************************************************************************/
 PUBLIC int execv(const char *path, char * argv[])
 {
+	DEBUG_PRINT("execv", "\nhello\n");
 	char **p = argv;
 	char arg_stack[PROC_ORIGIN_STACK];
 	int stack_len = 0;
@@ -89,7 +90,9 @@ PUBLIC int execv(const char *path, char * argv[])
 	msg.BUF		= (void*)arg_stack;
 	msg.BUF_LEN	= stack_len;
 
+	DEBUG_PRINT("execv", "current pid:%d", proc2pid(pcaller));
 	send_recv(BOTH, TASK_MM, &msg);
+	printx("nop\n");
 	assert(msg.type == SYSCALL_RET);
 
 	return msg.RETVAL;

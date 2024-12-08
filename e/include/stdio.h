@@ -158,7 +158,7 @@ PUBLIC int syslog(const char *fmt, ...);
 
 
 #ifndef DEBUG_PRINT
-#define DEBUG_PRINT(stage,str) \
-		printl("{STAGE} %s INFO: %s\n", stage, str)
+#define DEBUG_PRINT(stage, fmt, ...) \
+		printl("{%s} " fmt "\n", stage, ##__VA_ARGS__)
 		
 #endif

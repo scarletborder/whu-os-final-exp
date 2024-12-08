@@ -52,7 +52,11 @@ PUBLIC int send_recv(int function, int src_dest, MESSAGE* msg)
 	case BOTH:
 		ret = sendrec(SEND, src_dest, msg);
 		if (ret == 0)
-			ret = sendrec(RECEIVE, src_dest, msg);
+			{
+				// DEBUG_PRINT("send_recv", "111 src_dest: %d, I am %d", src_dest, msg->source);
+				ret = sendrec(RECEIVE, src_dest, msg);
+				// DEBUG_PRINT("send_recv", "222 src_dest: %d, I am %d", src_dest, msg->source);
+			}
 		break;
 	case SEND:
 	case RECEIVE:

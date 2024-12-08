@@ -91,7 +91,9 @@ PUBLIC int sys_sendrec(int function, int src_dest, MESSAGE* m, struct proc* p)
 			return ret;
 	}
 	else if (function == RECEIVE) {
+		disable_int();
 		ret = msg_receive(p, src_dest, m);
+		enable_int();
 		if (ret != 0)
 			return ret;
 	}
@@ -263,6 +265,7 @@ PRIVATE int msg_send(struct proc* current, int dest, MESSAGE* m)
 	if ((p_dest->p_flags & RECEIVING) && /* dest is waiting for the msg */
 	    (p_dest->p_recvfrom == proc2pid(sender) ||
 	     p_dest->p_recvfrom == ANY)) {
+
 		assert(p_dest->p_msg);
 		assert(m);
 
@@ -330,7 +333,7 @@ PRIVATE int msg_send(struct proc* current, int dest, MESSAGE* m)
  *****************************************************************************/
 PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 {
-	disable_int();
+	// disable_int();
 	struct proc* p_who_wanna_recv = current; /**
 						  * This name is a little bit
 						  * wierd, but it makes me
@@ -341,14 +344,13 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 	struct proc* prev = 0;
 	int copyok = 0;
 
-	assert(proc2pid(p_who_wanna_recv) != src);
+	assert(proc2pid(p_who_wanna_recv) != src);	
 
 	if ((p_who_wanna_recv->has_int_msg) &&
 	    ((src == ANY) || (src == INTERRUPT))) {
 		/* There is an interrupt needs p_who_wanna_recv's handling and
 		 * p_who_wanna_recv is ready to handle it.
-		 */
-
+		 */	
 		MESSAGE msg;
 		reset_msg(&msg);
 		msg.source = INTERRUPT;
@@ -395,7 +397,7 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 		/* p_who_wanna_recv wants to receive a message from
 		 * a certain proc: src.
 		 */
-		p_from = &proc_table[src];
+		p_from = &proc_table[src];	
 
 		if ((p_from->p_flags & SENDING) &&
 		    (p_from->p_sendto == proc2pid(p_who_wanna_recv))) {
@@ -413,8 +415,9 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 			while (p) {
 				assert(p_from->p_flags & SENDING);
 
-				if (proc2pid(p) == src) /* if p is the one */
+				if (proc2pid(p) == src) {/* if p is the one */
 					break;
+				}
 
 				prev = p;
 				p = p->next_sending;
@@ -470,6 +473,7 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 
 		p_who_wanna_recv->p_msg = m;
 		p_who_wanna_recv->p_recvfrom = src;
+
 		block(p_who_wanna_recv);
 
 		assert(p_who_wanna_recv->p_flags == RECEIVING);
@@ -479,7 +483,8 @@ PRIVATE int msg_receive(struct proc* current, int src, MESSAGE* m)
 		assert(p_who_wanna_recv->has_int_msg == 0);
 	}
 
-	enable_int();
+	// enable_int();
+
 	return 0;
 }
 

@@ -163,7 +163,6 @@ PUBLIC void in_process(TTY* tty, u32 key)
 	}
 	else {
 		int raw_code = key & MASK_RAW;
-		// printl("%x", raw_code);
 		switch(raw_code) {
 		case ENTER:
 			put_key(tty, '\n');
@@ -185,7 +184,7 @@ PUBLIC void in_process(TTY* tty, u32 key)
 			}
 			break;
 
-		/** TODO: 切换tty
+		/** 切换tty
 		 * Since alt + FN will invoke ubuntu's trigger, our fork os will change to another keybinds
 		 */
 		case F1:
@@ -197,8 +196,8 @@ PUBLIC void in_process(TTY* tty, u32 key)
 		case F7:
 		case F8:
 		case F9:
-			// printl("press FN");
-			// TODO: alt 不行,和ubuntu冲突
+
+			// alt 不行,和ubuntu冲突
 			// if ((key & FLAG_ALT_L) ||
 			//     (key & FLAG_ALT_R)) {	/* Alt + PAD1~12 */
 				// printl("switch");

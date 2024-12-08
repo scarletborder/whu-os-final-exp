@@ -63,10 +63,10 @@ PUBLIC void task_mm()
 			assert(0);
 			break;
 		}
-
 		if (reply) {
 			mm_msg.type = SYSCALL_RET;
 			send_recv(SEND, src, &mm_msg);
+			DEBUG_PRINT("taskmm", "reply %d dest %d, src %d", reply, src, mm_msg.source);
 		}
 	}
 }

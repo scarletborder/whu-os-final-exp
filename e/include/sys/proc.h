@@ -95,10 +95,10 @@ struct task {
  */
 #define	PROCS_BASE		0xA00000 /* 10 MB */
 #define	PROC_IMAGE_SIZE_DEFAULT	0x100000 /*  1 MB */
-#define	PROC_ORIGIN_STACK	0x400    /*  1 KB */
+#define	PROC_ORIGIN_STACK	0x1000    /*  4 KB */
 
 /* stacks of tasks */
-#define	STACK_SIZE_DEFAULT	0x4000 /* 16 KB */
+#define	STACK_SIZE_DEFAULT	0x8000 /* 32 KB */
 #define STACK_SIZE_TTY		STACK_SIZE_DEFAULT
 #define STACK_SIZE_SYS		STACK_SIZE_DEFAULT
 #define STACK_SIZE_HD		STACK_SIZE_DEFAULT

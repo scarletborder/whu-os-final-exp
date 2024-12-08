@@ -1,3 +1,5 @@
+// clang-format off
+
 /*************************************************************************//**
  *****************************************************************************
  * @file   mm/exec.c
@@ -45,12 +47,13 @@ PUBLIC int do_exec()
 
 	/* get the file size */
 	struct stat s;
-	int ret = stat(pathname, &s);
+
+	int ret = stat(pathname, &s); // 没用到stat的信息,但是用到了ret这个返回值
 	if (ret != 0) {
 		printl("{MM} MM::do_exec()::stat() returns error. %s", pathname);
 		return -1;
 	}
-
+	
 	/* read the file */
 	int fd = open(pathname, O_RDWR);
 	if (fd == -1)
@@ -58,6 +61,7 @@ PUBLIC int do_exec()
 	assert(s.st_size < MMBUF_SIZE);
 	read(fd, mmbuf, s.st_size);
 	close(fd);
+	
 
 	/* overwrite the current proc image with the new one */
 	Elf32_Ehdr* elf_hdr = (Elf32_Ehdr*)(mmbuf);
@@ -105,6 +109,7 @@ PUBLIC int do_exec()
 	proc_table[src].regs.esp = PROC_IMAGE_SIZE_DEFAULT - PROC_ORIGIN_STACK;
 
 	strcpy(proc_table[src].name, pathname);
+	// DEBUG_PRINT("exec", "find mmbuf, pathname: %s\n", pathname);// 只要启用就会百分百报错
 
 	return 0;
 }

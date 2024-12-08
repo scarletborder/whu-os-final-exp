@@ -75,12 +75,15 @@ PUBLIC int do_open()
 	if (i >= NR_FILE_DESC)
 		panic("f_desc_table[] is full (PID:%d)", proc2pid(pcaller));
 
+	DEBUG_PRINT("open", "start to search %s, fd:%d", pathname, fd);
+	// printl("%s\n",pathname);
 	int inode_nr = search_file(pathname);
+	// printl("end search,res %d\n", inode_nr);
 
 	struct inode * pin = 0; // first inode of this file
 	if (flags & O_CREAT) {
 		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
-		if (inode_nr) {
+		if (inode_nr) { // judge whether inode_nr is ZERO(INVALID), if not, means file exists 
 			printl("{FS} file exists.\n");
 			return -1;
 		}
@@ -90,6 +93,11 @@ PUBLIC int do_open()
 		// 
 	}
 	else { // load an existed file's inode
+		if (inode_nr == INVALID_INODE){ // not exists
+			DEBUG_PRINT("fs open", "the inode want to read is null");
+			return -1;
+		}
+
 		assert(flags & O_RDWR);
 
 		char filename[MAX_PATH];
@@ -135,6 +143,7 @@ PUBLIC int do_open()
 		return -1;
 	}
 
+	DEBUG_PRINT("fs open", "fd is %d -size: %d", fd, pcaller->filp[fd]->fd_inode->i_size);
 	return fd;
 }
 

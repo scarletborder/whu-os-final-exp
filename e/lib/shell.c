@@ -62,7 +62,6 @@ PUBLIC char *getcwd(char *buf, size_t size) {
 }
 
 PUBLIC char *get_full_path(char *path) {
-	printf("{gff} path before process: %s\n", path);
 	if (path[0] == '/') {
 		// 根目录开头的
 		return path;
@@ -139,6 +138,5 @@ PUBLIC char *get_full_path(char *path) {
 	// 将最终的路径复制到 tmp_path 并返回
 	_strcpy(tmp_path, final_path);
 
-	printf("{gff} path after process: %s\n", path);
 	return tmp_path;
 }
