@@ -243,9 +243,9 @@ PUBLIC void do_List_Dir() {
 	pde = (struct dir_entry *)fsbuf;  // 将当前块的内容指针转化为目录项指针
 	pde += m;
 
-	DEBUG_PRINT("fs_ls", "size of dir %d, nr_dir_entries:%d", dir_inode->i_size, nr_dir_entries);
-	DEBUG_PRINT("fs_ls", "i/nr_dir_blks:%d/%d, j/blockdir:%d/%d", i, nr_dir_blks, j, SECTOR_SIZE/DIR_ENTRY_SIZE);
-	DEBUG_PRINT("fs_ls_ent", "name %s", pde->name);
+	// DEBUG_PRINT("fs_ls", "size of dir %d, nr_dir_entries:%d", dir_inode->i_size, nr_dir_entries);
+	// DEBUG_PRINT("fs_ls", "i/nr_dir_blks:%d/%d, j/blockdir:%d/%d", i, nr_dir_blks, j, SECTOR_SIZE/DIR_ENTRY_SIZE);
+	// DEBUG_PRINT("fs_ls_ent", "name %s", pde->name);
 	_strcpy(out, pde->name);
 
 	// 如果遍历到的目录项数大于总目录项数，则结束
@@ -264,7 +264,7 @@ PUBLIC void do_List_Dir() {
 
 	// attr 放在stat
 
-	DEBUG_PRINT("fs_ls_ent", "m %d, node_nr %d", m, pde->inode_nr);
+	// DEBUG_PRINT("fs_ls_ent", "m %d, node_nr %d", m, pde->inode_nr);
 
 	j++;
 	pde++;

@@ -60,7 +60,6 @@ PUBLIC void task_fs() {
 			fs_msg.FD = do_mkdir();
 			break;
 		case LIST:
-			
 			do_List_Dir();
 			break;
 		case CLOSE:

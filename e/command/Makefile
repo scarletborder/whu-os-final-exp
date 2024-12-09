@@ -53,7 +53,7 @@ pwd.o: pwd.c ../include/type.h ../include/stdio.h
 pwd : pwd.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
 
-ls.o: ls.c ../include/type.h ../include/stdio.h ../include/mdirent.h
+ls.o: ls.c ../include/type.h ../include/stdio.h ../include/mdirent.h ../include/unistd.h ../include/string.h ../include/cmdparser.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 ls : ls.o start.o $(LIB)

@@ -8,7 +8,6 @@
 #define _SCARLETBORDER_UNISTD_H_
 
 #include "type.h"
-#include "global.h"
 
 //clang-format on
 

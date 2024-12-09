@@ -11,15 +11,16 @@ typedef struct {
 	int m;
 } DIR;
 
-struct dirent {
-	char *filename;
-	u32 i_mode;
-	u32 i_size;
-};
+// directly use char*, use `stat()` to get attributes of dir instead
+// struct dirent {
+// 	char *filename;
+// 	u32 i_mode;
+// 	u32 i_size;
+// };
 
 int opendir(char *path, DIR *d);
 
-void readdir(DIR *dir, struct dirent *ret);
+void readdir(DIR *dir, char *ret);
 
 int closedir(DIR *d);
 

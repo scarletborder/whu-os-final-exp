@@ -29,7 +29,7 @@ int opendir(char *path, DIR *d) {
 	return 0;
 }
 
-void readdir(DIR *dir, struct dirent *ret) {
+void readdir(DIR *dir, char *ret) {
 	if (dir == 0) {
 		return 0;
 	}
@@ -41,20 +41,18 @@ void readdir(DIR *dir, struct dirent *ret) {
 	msg.u.m3.m3i2 = dir->i;
 	msg.u.m3.m3i3 = dir->j;
 	msg.u.m3.m3i4 = dir->dev;
-	msg.PATHNAME  = (void*)out;
+	msg.PATHNAME  = (void *)out;
 	msg.u.m3.m3l1 = dir->m;
 
 	send_recv(BOTH, TASK_FS, &msg);
-	printf("%s\n", msg.PATHNAME);
+
+	dir->i = msg.u.m3.m3i2;
+	dir->j = msg.u.m3.m3i3;
+	dir->m = msg.u.m3.m3l1;
 
 	assert(msg.type == SYSCALL_RET);
 
-	dir->i        = msg.u.m3.m3i2;
-	dir->j        = msg.u.m3.m3i3;
-	dir->m        = msg.u.m3.m3l1;
-	ret->filename = msg.u.m3.m3p1;
-
-	printf("i%d.j%d.m%d", dir->i, dir->j, dir->m);
+	_strcpy(ret, msg.PATHNAME);
 }
 
 int closedir(DIR *d) {

@@ -69,10 +69,13 @@ PUBLIC char *get_full_path(char *path) {
 
 	// 临时路径，用于处理路径段
 	char *token;
-	char temp_path[BYTES_SHELL_WORKING_DIRECTORY + 101]; // 用于拼接新的路径
+	char temp_path[BYTES_SHELL_WORKING_DIRECTORY + 101] = {'\0'}; // 用于拼接新的路径
 
+	size_t len1 = strlen(Working_Directory);
+	// printl("[DEBUG ls] %s %d", Working_Directory, len1);
 	// 初始化 tmp_path 为当前工作目录
 	_strcpy(temp_path, Working_Directory);
+
 	size_t len = strlen(temp_path);
 
 	// 如果路径不是根路径, 并且当前路径没有以 / 结尾, 添加 /
@@ -137,6 +140,8 @@ PUBLIC char *get_full_path(char *path) {
 
 	// 将最终的路径复制到 tmp_path 并返回
 	_strcpy(tmp_path, final_path);
+
+	// printl("")
 
 	return tmp_path;
 }
