@@ -168,11 +168,12 @@ int do_mkdir(){
 	if (flags & O_CREAT) {
 		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
 		if (inode_nr) {
-			printl("{FS} dir exists.\n");
+			printl("{FS_DIR} dir exists.\n");
 			return -1;
 		}
 		else {
 			pin = create_dir(pathname, flags);
+			printl("{FS_DIR} %s is created successfully\n", pathname);
 		}
 		// 
 	}

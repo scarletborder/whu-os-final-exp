@@ -3,6 +3,8 @@
         "unistd.h": "c",
         "cstdio": "c",
         "cmdparser.h": "c",
-        "mdirent.h": "c"
+        "mdirent.h": "c",
+        "stdio.h": "c",
+        "type.h": "c"
     }
 }

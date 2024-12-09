@@ -221,7 +221,7 @@ PUBLIC void do_List_Dir() {
 	char out[MAX_FILENAME_LEN + 1];
 	_strcpy(out, "\0");
 
-	struct inode* dir_inode = root_inode; // pcaller->filp[fd]->fd_inode	
+	struct inode* dir_inode = pcaller->filp[fd]->fd_inode; // pcaller->filp[fd]->fd_inode	
 	int dev = dir_inode->i_dev;
 	/**
 	 * Search the dir for the entry.

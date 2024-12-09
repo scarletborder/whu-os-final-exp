@@ -12,7 +12,7 @@ CFLAGS		= -I ../include/ -c -fno-builtin -fno-stack-protector -Wall
 LDFLAGS		= -Ttext 0x1000
 DASMFLAGS	= -D
 LIB		= ../lib/orangescrt.a
-BIN		= echo pwd ls
+BIN		= echo pwd ls mkdir
 
 # All Phony Targets
 .PHONY : everything final clean realclean disasm all install
@@ -57,4 +57,10 @@ ls.o: ls.c ../include/type.h ../include/stdio.h ../include/mdirent.h ../include/
 	$(CC) $(CFLAGS) -o $@ $<
 
 ls : ls.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+mkdir.o: mkdir.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+mkdir : mkdir.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
