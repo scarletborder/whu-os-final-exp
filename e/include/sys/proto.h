@@ -95,12 +95,14 @@ PUBLIC int		do_rdwt();
 
 /* fs/link.c */
 PUBLIC int		do_unlink();
+PUBLIC u64		getsize(struct inode* first);
 
 /* fs/misc.c */
 PUBLIC int		do_stat();
 PUBLIC int		strip_path(char * filename, const char * pathname,
 				   struct inode** ppinode);
 PUBLIC int		search_file(char * path);
+PUBLIC void    do_List_Dir();
 
 /* fs/disklog.c */
 PUBLIC int		do_disklog();

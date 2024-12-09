@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "cstdio": "c",
+        "cmdparser.h": "c",
+        "mdirent.h": "c"
+    }
+}
