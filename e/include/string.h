@@ -13,6 +13,7 @@ PUBLIC	int	strcmp(const char * s1, const char *s2);
 PUBLIC	char*	strcat(char * s1, const char *s2);
 PUBLIC  char *strtok(char *str, const char *delim);
 PUBLIC  char * _strcpy(char *dest, char *src);
+PUBLIC  void proc_memcpy(void* p_dst, int pid_dst, void* p_src, int pid_src, int len);
 
 /**
  * `phys_copy' and `phys_set' are used only in the kernel, where segments

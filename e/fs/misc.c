@@ -49,7 +49,6 @@ PUBLIC int do_stat()
 	pathname[name_len] = 0;	/* terminate the string */
 
 	int inode_nr = search_file(pathname);
-	DEBUG_PRINT("do_stat", "1 searchfile success");
 	if (inode_nr == INVALID_INODE) {	/* file not found */
 		printl("{FS} FS::do_stat():: search_file() returns "
 		       "invalid inode: %s\n", pathname);
@@ -281,7 +280,7 @@ PUBLIC void do_List_Dir() {
 	fs_msg.u.m3.m3l1 = m;
 	if (i >= nr_dir_blks) {
 		// 结束了,这是最后一次
-		printl("bye\n");
+		// printl("bye\n");
 		out[0] = '\0';
 		fs_msg.u.m3.m3l1 = m;
 		
@@ -298,7 +297,7 @@ PUBLIC void do_List_Dir() {
 		  (void*)va2la(TASK_FS, out),	 /* from */
 		  length + 1);
 
-		printl("len%d,ss: %s\n", length, va2la(fs_msg.source, fs_msg.PATHNAME));
+		// printl("len%d,ss: %s\n", length, va2la(fs_msg.source, fs_msg.PATHNAME));
 		return;
 	}
 }

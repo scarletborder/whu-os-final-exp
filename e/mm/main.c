@@ -54,6 +54,14 @@ PUBLIC void task_mm()
 		case EXEC:
 			mm_msg.RETVAL = do_exec();
 			break;
+		case COPY:
+		printx("recv!!");
+			phys_copy((void*)va2la(mm_msg.u.m3.m3i1, mm_msg.u.m3.m3p1),    /* to   */
+		 		(void*)va2la(mm_msg.u.m3.m3i2, mm_msg.u.m3.m3p2), /* from */
+		  		mm_msg.u.m3.m3i3);
+			reply = 0;
+			break;
+
 		case WAIT:
 			do_wait();
 			reply = 0;

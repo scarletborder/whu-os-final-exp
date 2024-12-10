@@ -21,19 +21,26 @@
  * 
  * NOTE: the logic code will not validate whether the target path is a directory
  */
-int chdir(char *path);
+EXTERN int chdir(char *path);
 
 // 系统信息与控制
+
+EXTERN void extractExecDir(char* full_path, char* buf);
 
 /**
  * Get current working directory
  */
+#define GetCwd(buf) extractExecDir(argv[0], buf)
+
 char *getcwd(char *buf, size_t size);
+
+EXTERN void extractExecDir(char* full_path, char* buf);
 
 /**
  * util: cat a full filepath for a relative path
  */
-char *get_full_path(char* path);
+EXTERN void get_full_path(char *path, char* buf);
+
 
 
 /**

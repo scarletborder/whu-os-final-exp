@@ -9,34 +9,8 @@
 #endif
 
 int main(int argc, char *argv[]) {
-	char dir[256];
-	// 处理第一个参数即软件路径
-
-	char *full_path  = argv[0]; // 获取程序的完整路径
-	char *last_slash = NULL;    // 用于存储最后一个 '/' 的位置
-
-	// 遍历字符串找到最后一个 '/' 字符
-	for (char *ptr = full_path; *ptr != '\0'; ptr++) {
-		if (*ptr == '/') {
-			last_slash = ptr;
-		}
-	}
-	// 如果找到了 '/'，则截取目录部分
-	if (last_slash != NULL) {
-		// 用指针操作来截取路径
-
-		for (int i = 0; i < last_slash - full_path; i++) {
-			dir[i] = full_path[i];
-		}
-		dir[last_slash - full_path] = '\0'; // 添加字符串结束符
-	} else {
-		// 如果没有找到 '/', 说明路径没有目录部分
-		printf("No directory in path\n");
-	}
-	if (dir[0] == '\0') { // 根目录'/'
-		dir[0] = '/';
-		dir[1] = '\0';
-	}
+	char dir[256]; // 目前的工作路径
+	GetCwd(dir);
 
 	// 解析参数
 	int option_l = 0, option_a = 0; // 详细 / 显示隐藏文件
@@ -89,7 +63,8 @@ int main(int argc, char *argv[]) {
 			if (option_l) { // 详细显示
 				// fs stat
 				struct stat f_stat;
-				char *f_path = get_full_path(buff);
+				char f_path[256] = {'\0'};
+				get_full_path(buff, f_path);
 				printf("\n%s\n", f_path);
 				stat(f_path, &f_stat);
 				int f_size      = f_stat.st_size;

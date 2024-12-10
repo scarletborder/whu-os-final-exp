@@ -59,7 +59,8 @@ EXTERN	struct inode *		root_inode;
 extern	struct dev_drv_map	dd_map[];
 
 /* For shell use */
-EXTERN char Working_Directory[BYTES_SHELL_WORKING_DIRECTORY];
+EXTERN char* Working_Directory;
+PUBLIC int Shell_PID;
 
 /* for test only */
 extern	char *			logbuf;
