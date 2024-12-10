@@ -13,6 +13,7 @@ PUBLIC	int	strcmp(const char * s1, const char *s2);
 PUBLIC	char*	strcat(char * s1, const char *s2);
 PUBLIC  char *strtok(char *str, const char *delim);
 PUBLIC  char * _strcpy(char *dest, char *src);
+PUBLIC  int atoi(const char *str);
 
 /**
  * `phys_copy' and `phys_set' are used only in the kernel, where segments
