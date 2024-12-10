@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[]) {
 	char dir[256]; // 目前的工作路径
-	GetCwd(dir);
+	getcwd(dir, 256);
 
 	// 解析参数
 	int option_l = 0, option_a = 0; // 详细 / 显示隐藏文件
