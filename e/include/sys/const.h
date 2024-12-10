@@ -1,3 +1,4 @@
+// clang-format off
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             const.h
@@ -176,7 +177,7 @@ enum msgtype {
 	SUSPEND_PROC, RESUME_PROC,
 
 	/* MM */
-	EXEC, WAIT, COPY,
+	EXEC, WAIT, TYPESHELL,
 
 	/* FS & MM */
 	FORK, EXIT,
@@ -190,6 +191,11 @@ enum msgtype {
 	DEV_READ,
 	DEV_WRITE,
 	DEV_IOCTL
+};
+
+enum ShellMsgType {
+	SHELL_INIT = 1,
+	SHELL_CHDIR, SHELL_GETCWD
 };
 
 /* macros for messages */

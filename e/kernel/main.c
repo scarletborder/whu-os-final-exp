@@ -241,11 +241,11 @@ void shabby_shell(const char *tty_name) {
 	assert(fd_stdout == 1);
 
 	char rdbuf[128];
-	printl("{main shell}pid:%d\n", Shell_PID);
-	// Shell_PID = getpid();
+	char curpath[BYTES_SHELL_WORKING_DIRECTORY];
 
 	while (1) {
-		write(1, Working_Directory, strlen(Working_Directory));
+		getcwd( curpath,BYTES_SHELL_WORKING_DIRECTORY);
+		write(1, curpath, strlen(curpath));
 		write(1, "$ ", 2);
 		int r    = read(0, rdbuf, 70);
 		rdbuf[r] = 0;
@@ -277,7 +277,7 @@ void shabby_shell(const char *tty_name) {
 
 		char full_path[256] = "";
 		get_full_path(argv[0], full_path);
-		// printf("[shell] want to exec %s \n", full_path);
+		printf("[shell] want to exec %s \n", full_path);
 		int fd = open(full_path, O_RDWR);
 		if (fd == -1) {
 			if (rdbuf[0]) {
@@ -318,8 +318,7 @@ void Init() {
 	assert(fd_stdout == 1);
 
 	printf("Init() is running ...\n");
-	char cur_d[BYTES_SHELL_WORKING_DIRECTORY] = {'/','\0'};
-	Init_Shell(cur_d);
+	Init_Shell("/");
 
 	/* extract `cmd.tar' */
 	untar("/cmd.tar");

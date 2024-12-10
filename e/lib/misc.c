@@ -249,6 +249,23 @@ char *_strcpy(char *dest, char *src) {
     return dest;  // 返回目标字符串的起始地址
 }
 
+char *_strncpy(char *dest, const char *src, size_t n) {
+    size_t i;
+
+    // 逐字符复制，直到到达 n 或 src 的末尾
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+
+    // 如果 src 长度不足 n，则用 '\0' 填充剩余空间
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+
+    return dest;
+}
+
+
 PUBLIC  void proc_memcpy(void* p_dst, int pid_dst, void* p_src, int pid_src, int len){
 	_strcpy(p_dst, p_src);
 	// MESSAGE mm_msg;
@@ -258,7 +275,7 @@ PUBLIC  void proc_memcpy(void* p_dst, int pid_dst, void* p_src, int pid_src, int
 	// mm_msg.u.m3.m3p2 = (void*)p_src;
 	// mm_msg.u.m3.m3i3 = len;
 
-	// mm_msg.type = COPY;
+	// mm_msg.type = TYPESHELL;
 
 	// send_recv(SEND, TASK_MM, &mm_msg);
 }

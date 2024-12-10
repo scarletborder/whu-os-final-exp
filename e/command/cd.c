@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
 		printf("ERROR target entry is not a directory\n");
 		return -1;
 	}
+	printf("swith\n");
 
 	// 切换
 	chdir(dir);

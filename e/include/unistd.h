@@ -21,11 +21,11 @@
  * 
  * NOTE: the logic code will not validate whether the target path is a directory
  */
-EXTERN int chdir(char *path);
+int chdir(char *path);
 
 // 系统信息与控制
 
-EXTERN void extractExecDir(char* full_path, char* buf);
+void extractExecDir(char* full_path, char* buf);
 
 /**
  * Get current working directory
@@ -34,12 +34,12 @@ EXTERN void extractExecDir(char* full_path, char* buf);
 
 char *getcwd(char *buf, size_t size);
 
-EXTERN void extractExecDir(char* full_path, char* buf);
+PUBLIC void extractExecDir(char* full_path, char* buf);
 
 /**
  * util: cat a full filepath for a relative path
  */
-EXTERN void get_full_path(char *path, char* buf);
+PUBLIC void get_full_path(char *path, char* buf);
 
 
 
@@ -48,6 +48,6 @@ EXTERN void get_full_path(char *path, char* buf);
  * 
  * this function will initialize parameters related with shell
  */
-void Init_Shell();
+void Init_Shell(char*);
 
 #endif

@@ -12,6 +12,8 @@
         "type.h": "c",
         "console.h": "c",
         "const.h": "c",
-        "mdirent.h": "c"
+        "mdirent.h": "c",
+        "keyboard.h": "c",
+        "string.h": "c"
     }
 }

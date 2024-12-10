@@ -34,7 +34,7 @@ OBJS		= kernel/kernel.o kernel/start.o kernel/main.o\
 			kernel/systask.o kernel/hd.o\
 			kernel/kliba.o kernel/klib.o\
 			lib/syslog.o\
-			mm/main.o mm/forkexit.o mm/exec.o\
+			mm/main.o mm/forkexit.o mm/exec.o mm/shell.o\
 			fs/main.o fs/open.o fs/misc.o fs/read_write.o\
 			fs/link.o\
 			fs/disklog.o
@@ -202,6 +202,9 @@ mm/forkexit.o: mm/forkexit.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 mm/exec.o: mm/exec.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+mm/shell.o: mm/shell.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 fs/main.o: fs/main.c

@@ -46,6 +46,8 @@ EXTERN	MESSAGE			mm_msg;
 extern	u8 *			mmbuf;
 extern	const int		MMBUF_SIZE;
 EXTERN	int			memory_size;
+/* For shell use */
+EXTERN char Working_Directory[BYTES_SHELL_WORKING_DIRECTORY];
 
 /* FS */
 EXTERN	struct file_desc	f_desc_table[NR_FILE_DESC];
@@ -57,10 +59,6 @@ EXTERN	MESSAGE			fs_msg;
 EXTERN	struct proc *		pcaller;
 EXTERN	struct inode *		root_inode;
 extern	struct dev_drv_map	dd_map[];
-
-/* For shell use */
-EXTERN char* Working_Directory;
-PUBLIC int Shell_PID;
 
 /* for test only */
 extern	char *			logbuf;

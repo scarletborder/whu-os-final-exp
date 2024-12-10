@@ -86,7 +86,8 @@ PUBLIC	const int	FSBUF_SIZE	= 0x100000;
  */
 PUBLIC	u8 *		mmbuf		= (u8*)0x700000;
 PUBLIC	const int	MMBUF_SIZE	= 0x100000;
-
+/* For shell use */
+PUBLIC char Working_Directory[BYTES_SHELL_WORKING_DIRECTORY];
 
 /**
  * 8MB~10MB: buffer for log (debug)
