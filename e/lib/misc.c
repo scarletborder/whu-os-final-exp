@@ -234,18 +234,68 @@ char *strtok(char *str, const char *delim) {
 char *_strcpy(char *dest, char *src) {
     // 用指针逐个复制字符
     char *d = dest;
+	char *s = src;
 
     // 逐个字符复制，直到遇到字符串结束符 '\0'
-    while (*src != '\0') {
-        *d = *src;  // 复制当前字符
+    while (*s != '\0') {
+        *d = *s;  // 复制当前字符
         d++;         // 移动目标指针
-        src++;       // 移动源指针
+        s++;       // 移动源指针
     }
 
     // 复制结束符 '\0'
     *d = '\0';
 
     return dest;  // 返回目标字符串的起始地址
+}
+
+char *_strncpy(char *dest, const char *src, size_t n) {
+    size_t i;
+
+    // 逐字符复制，直到到达 n 或 src 的末尾
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+
+    // 如果 src 长度不足 n，则用 '\0' 填充剩余空间
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+
+    return dest;
+}
+
+PUBLIC  void memmove(void* dst, void* src, int size){
+    char* d = (char*)dst;
+    char* s = (char*)src;
+
+    if (d < s) {
+        // 前向复制
+        for (int i = 0; i < size; i++) {
+            d[i] = s[i];
+        }
+    } else if (d > s) {
+        // 后向复制
+        for (int i = size - 1; i >= 0; i--) {
+            d[i] = s[i];
+        }
+    }
+    // 如果 dst == src，无需复制
+}
+
+
+PUBLIC  void proc_memcpy(void* p_dst, int pid_dst, void* p_src, int pid_src, int len){
+	_strcpy(p_dst, p_src);
+	// MESSAGE mm_msg;
+	// mm_msg.u.m3.m3i1 = pid_dst;
+	// mm_msg.u.m3.m3i2 = pid_src;
+	// mm_msg.u.m3.m3p1 = (void*)p_dst;
+	// mm_msg.u.m3.m3p2 = (void*)p_src;
+	// mm_msg.u.m3.m3i3 = len;
+
+	// mm_msg.type = TYPESHELL;
+
+	// send_recv(SEND, TASK_MM, &mm_msg);
 }
 
 /*****************************************************************************

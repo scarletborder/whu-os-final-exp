@@ -42,6 +42,16 @@ PRIVATE void	set_leds();
 PRIVATE void	kb_wait();
 PRIVATE void	kb_ack();
 
+int IsFlag(int flag) {
+	int key = 0;
+	key |= shift_l	? FLAG_SHIFT_L	: 0;
+	key |= shift_r	? FLAG_SHIFT_R	: 0;
+	key |= ctrl_l	? FLAG_CTRL_L	: 0;
+	key |= ctrl_r	? FLAG_CTRL_R	: 0;
+	key |= alt_l	? FLAG_ALT_L	: 0;
+	key |= alt_r	? FLAG_ALT_R	: 0;
+	return (flag & key);
+}
 
 /*****************************************************************************
  *                                keyboard_handler

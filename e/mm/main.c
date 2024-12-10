@@ -1,3 +1,5 @@
+// clang-format off
+
 /*************************************************************************//**
  *****************************************************************************
  * @file   mm/main.c
@@ -20,6 +22,8 @@
 #include "global.h"
 #include "keyboard.h"
 #include "proto.h"
+
+#include "shell.h"
 
 PUBLIC void do_fork_test();
 
@@ -54,6 +58,9 @@ PUBLIC void task_mm()
 		case EXEC:
 			mm_msg.RETVAL = do_exec();
 			break;
+		case TYPESHELL:
+			mm_msg.RETVAL = do_shell();
+			break;
 		case WAIT:
 			do_wait();
 			reply = 0;
@@ -66,7 +73,6 @@ PUBLIC void task_mm()
 		if (reply) {
 			mm_msg.type = SYSCALL_RET;
 			send_recv(SEND, src, &mm_msg);
-			DEBUG_PRINT("taskmm", "reply %d dest %d, src %d", reply, src, mm_msg.source);
 		}
 	}
 }

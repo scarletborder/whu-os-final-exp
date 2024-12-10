@@ -25,15 +25,22 @@ int chdir(char *path);
 
 // 系统信息与控制
 
+void extractExecDir(char* full_path, char* buf);
+
 /**
  * Get current working directory
  */
+#define GetCwd(buf) extractExecDir(argv[0], buf)
+
 char *getcwd(char *buf, size_t size);
+
+PUBLIC void extractExecDir(char* full_path, char* buf);
 
 /**
  * util: cat a full filepath for a relative path
  */
-char *get_full_path(char* path);
+PUBLIC void get_full_path(char *path, char* buf);
+
 
 
 /**
@@ -41,6 +48,6 @@ char *get_full_path(char* path);
  * 
  * this function will initialize parameters related with shell
  */
-void Init_Shell();
+void Init_Shell(char*);
 
 #endif

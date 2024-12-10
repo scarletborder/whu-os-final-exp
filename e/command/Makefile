@@ -12,7 +12,7 @@ CFLAGS		= -I ../include/ -c -fno-builtin -fno-stack-protector -Wall
 LDFLAGS		= -Ttext 0x1000
 DASMFLAGS	= -D
 LIB		= ../lib/orangescrt.a
-BIN		= echo pwd ls
+BIN		= echo pwd ls mkdir cd touch rm vi keytest cat
 
 # All Phony Targets
 .PHONY : everything final clean realclean disasm all install
@@ -47,7 +47,7 @@ echo.o: echo.c ../include/type.h ../include/stdio.h
 echo : echo.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
 
-pwd.o: pwd.c ../include/type.h ../include/stdio.h
+pwd.o: pwd.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 pwd : pwd.o start.o $(LIB)
@@ -57,4 +57,47 @@ ls.o: ls.c ../include/type.h ../include/stdio.h ../include/mdirent.h ../include/
 	$(CC) $(CFLAGS) -o $@ $<
 
 ls : ls.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+mkdir.o: mkdir.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+mkdir : mkdir.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+cd.o: cd.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+cd : cd.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+touch.o: touch.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+touch : touch.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+rm.o: rm.c ../include/type.h ../include/stdio.h ../include/mdirent.h ../include/unistd.h ../include/string.h ../include/cmdparser.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+rm : rm.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+
+vi.o: vi.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h ../include/keywise.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+vi : vi.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+keytest.o: keytest.c ../include/type.h ../include/stdio.h ../include/keywise.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+keytest : keytest.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+cat.o: cat.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h ../include/keywise.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+cat : cat.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
