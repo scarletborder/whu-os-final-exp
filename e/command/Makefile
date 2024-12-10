@@ -47,7 +47,7 @@ echo.o: echo.c ../include/type.h ../include/stdio.h
 echo : echo.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
 
-pwd.o: pwd.c ../include/type.h ../include/stdio.h
+pwd.o: pwd.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include/string.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 pwd : pwd.o start.o $(LIB)
