@@ -6,13 +6,14 @@
 // 用户send后,看看这个值,然后将其充值为原始0
 int _kbhit();
 
-// 用户send,阻塞
-// keyboard.c设置一个变量
-// keyboard.c下次正常运行读取键盘会send回来
+// 阻塞函数
+// 会阻塞到用户按下键盘(只有一个scan code(ascii))
 int _getch();
 
 // 判断是否具有某种状态,比如shift
 int IsFlag(int flag);
+
+int IsExt(int ch);
 
 // clang-format off
 #ifndef	_ORANGES_KEYBOARD_H_

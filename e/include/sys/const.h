@@ -176,9 +176,6 @@ enum msgtype {
 	/* FS & TTY */
 	SUSPEND_PROC, RESUME_PROC,
 
-	/* TTY */
-	TYPETTY,
-
 	/* MM */
 	EXEC, WAIT, TYPESHELL,
 
@@ -197,8 +194,13 @@ enum msgtype {
 };
 
 enum ShellMsgType {
-	SHELL_INIT = 1,
+	SHELL_INIT = 2001,
 	SHELL_CHDIR, SHELL_GETCWD
+};
+
+enum TTYMsgType {
+	TTY_KHIT = 3001,
+	TTY_GETCH, TTY_FLAGTEST
 };
 
 /* macros for messages */

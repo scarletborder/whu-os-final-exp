@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
 
 	// 拼接目录生成即将的新地址
 	get_full_path(argv[1], dir);
-	printf("will open '%s'\n", dir);
 
 	struct stat f_stat;
 	int ret = stat(dir, &f_stat);
@@ -29,10 +28,8 @@ int main(int argc, char *argv[]) {
 		printf("ERROR target entry is not a directory\n");
 		return -1;
 	}
-	printf("swith\n");
 
 	// 切换
 	chdir(dir);
-	printf("\n");
 	return 0;
 }

@@ -265,6 +265,24 @@ char *_strncpy(char *dest, const char *src, size_t n) {
     return dest;
 }
 
+PUBLIC  void memmove(void* dst, void* src, int size){
+    char* d = (char*)dst;
+    char* s = (char*)src;
+
+    if (d < s) {
+        // 前向复制
+        for (int i = 0; i < size; i++) {
+            d[i] = s[i];
+        }
+    } else if (d > s) {
+        // 后向复制
+        for (int i = size - 1; i >= 0; i--) {
+            d[i] = s[i];
+        }
+    }
+    // 如果 dst == src，无需复制
+}
+
 
 PUBLIC  void proc_memcpy(void* p_dst, int pid_dst, void* p_src, int pid_src, int len){
 	_strcpy(p_dst, p_src);

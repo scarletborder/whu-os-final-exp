@@ -19,8 +19,7 @@
 // 用户send后,看看这个值,然后将其充值为原始0
 int _kbhit() {
 	MESSAGE msg;
-	msg.type      = TYPETTY;
-	msg.u.m1.m1i1 = 1;
+	msg.type = TTY_KHIT;
 	send_recv(BOTH, TASK_TTY, &msg);
 	return msg.u.m1.m1i2;
 }
@@ -30,17 +29,19 @@ int _kbhit() {
 // keyboard.c下次正常运行读取键盘会send回来
 int _getch() {
 	MESSAGE msg;
-	msg.type      = TYPETTY;
-	msg.u.m1.m1i1 = 2;
+	msg.type = TTY_GETCH;
 	send_recv(BOTH, TASK_TTY, &msg);
 	return msg.u.m1.m1i2;
 }
 
 int IsFlag(int flag) {
-    MESSAGE msg;
-	msg.type      = TYPETTY;
-	msg.u.m1.m1i1 = 3;
-    msg.u.m1.m1i2 = flag;
+	MESSAGE msg;
+	msg.type      = TTY_FLAGTEST;
+	msg.u.m1.m1i2 = flag;
 	send_recv(BOTH, TASK_TTY, &msg);
 	return msg.u.m1.m1i2;
+}
+
+int IsExt(int ch) {
+	return (ch & FLAG_EXT);
 }
