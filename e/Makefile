@@ -34,17 +34,17 @@ OBJS		= kernel/kernel.o kernel/start.o kernel/main.o\
 			kernel/systask.o kernel/hd.o\
 			kernel/kliba.o kernel/klib.o\
 			lib/syslog.o\
-			mm/main.o mm/forkexit.o mm/exec.o\
+			mm/main.o mm/forkexit.o mm/exec.o mm/shell.o\
 			fs/main.o fs/open.o fs/misc.o fs/read_write.o\
 			fs/link.o\
 			fs/disklog.o
 LOBJS		=  lib/syscall.o\
 			lib/printf.o lib/vsprintf.o\
 			lib/string.o lib/misc.o\
-			lib/open.o lib/read.o lib/write.o lib/close.o lib/unlink.o\
+			lib/open.o lib/read.o lib/write.o lib/close.o lib/unlink.o lib/lseek.o\
 			lib/getpid.o lib/stat.o\
 			lib/fork.o lib/exit.o lib/wait.o lib/exec.o\
-			lib/shell.o lib/dirent.o lib/cmdparser.o
+			lib/shell.o lib/dirent.o lib/cmdparser.o lib/keywise.o
 DASMOUTPUT	= kernel.bin.asm
 
 # All Phony Targets
@@ -155,6 +155,9 @@ lib/open.o: lib/open.c
 lib/read.o: lib/read.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+lib/lseek.o: lib/lseek.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 lib/write.o: lib/write.c
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -204,6 +207,9 @@ mm/forkexit.o: mm/forkexit.c
 mm/exec.o: mm/exec.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+mm/shell.o: mm/shell.c
+	$(CC) $(CFLAGS) -o $@ $<
+
 fs/main.o: fs/main.c
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -219,3 +225,5 @@ fs/link.o: fs/link.c
 fs/disklog.o: fs/disklog.c
 	$(CC) $(CFLAGS) -o $@ $<
 
+lib/keywise.o: lib/keywise.c
+	$(CC) $(CFLAGS) -o $@ $<

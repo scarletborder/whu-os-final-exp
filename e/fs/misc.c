@@ -49,7 +49,6 @@ PUBLIC int do_stat()
 	pathname[name_len] = 0;	/* terminate the string */
 
 	int inode_nr = search_file(pathname);
-	DEBUG_PRINT("do_stat", "1 searchfile success");
 	if (inode_nr == INVALID_INODE) {	/* file not found */
 		printl("{FS} FS::do_stat():: search_file() returns "
 		       "invalid inode: %s\n", pathname);
@@ -122,7 +121,8 @@ PUBLIC int low_search_entry(struct inode* dir_inode, char *entryName){
 		RD_SECT(dir_inode->i_dev, dir_blk0_nr + i);
 		pde = (struct dir_entry *)fsbuf;
 		for (j = 0; j < SECTOR_SIZE / DIR_ENTRY_SIZE; j++,pde++) {
-			if (memcmp(entryName, pde->name, MAX_FILENAME_LEN) == 0) {
+			printl("{low search}%s\n", pde->name);
+			if (strcmp(entryName, pde->name) == 0) {
 				last_query_dev = dir_inode->i_dev;
 				return pde->inode_nr;
 			}
@@ -221,7 +221,7 @@ PUBLIC void do_List_Dir() {
 	char out[MAX_FILENAME_LEN + 1];
 	_strcpy(out, "\0");
 
-	struct inode* dir_inode = root_inode; // pcaller->filp[fd]->fd_inode	
+	struct inode* dir_inode = pcaller->filp[fd]->fd_inode; // pcaller->filp[fd]->fd_inode	
 	int dev = dir_inode->i_dev;
 	/**
 	 * Search the dir for the entry.
@@ -281,7 +281,7 @@ PUBLIC void do_List_Dir() {
 	fs_msg.u.m3.m3l1 = m;
 	if (i >= nr_dir_blks) {
 		// 结束了,这是最后一次
-		printl("bye\n");
+		// printl("bye\n");
 		out[0] = '\0';
 		fs_msg.u.m3.m3l1 = m;
 		
@@ -298,7 +298,7 @@ PUBLIC void do_List_Dir() {
 		  (void*)va2la(TASK_FS, out),	 /* from */
 		  length + 1);
 
-		printl("len%d,ss: %s\n", length, va2la(fs_msg.source, fs_msg.PATHNAME));
+		// printl("len%d,ss: %s\n", length, va2la(fs_msg.source, fs_msg.PATHNAME));
 		return;
 	}
 }
@@ -357,14 +357,18 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 			// filename[-1] = 0
 			*cur_entry_name = 0;
 			// 根据当前的entry name找inode
+			printl("{misc strip}next filename=%s\n", filename);
 			int next_dir_inode_nr = low_search_entry(curDirInode, filename);
+			printl("{misc strip}next_node_nr=%d\n", next_dir_inode_nr);
 			if (next_dir_inode_nr == INVALID_INODE) return -1;
 			int cur_dev = curDirInode->i_dev;
 			if (IsRootDir == 0) put_inode(curDirInode); // 先前的dir不需要再引用了
+			IsRootDir == 0;
 			curDirInode = get_inode(cur_dev, next_dir_inode_nr);
 			
 			// buffer指针重新回到开头
 			cur_entry_name = filename;
+			s++; // skip 现在的/
 		}
 		*cur_entry_name++ = *s++;
 		/* if filename is too long, just truncate it */

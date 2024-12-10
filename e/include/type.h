@@ -8,6 +8,10 @@
 #ifndef _ORANGES_TYPE_H_
 #define _ORANGES_TYPE_H_
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /* routine types */
 #define PUBLIC         /* PUBLIC is the opposite of PRIVATE */
 #define PRIVATE static /* PRIVATE x limits the scope of x */

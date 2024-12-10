@@ -61,6 +61,14 @@ PRIVATE void	tty_do_read	(TTY* tty, MESSAGE* msg);
 PRIVATE void	tty_do_write	(TTY* tty, MESSAGE* msg);
 PRIVATE void	put_key		(TTY* tty, u32 key);
 
+PRIVATE void do_khit(MESSAGE *msg);
+PRIVATE void do_getch(MESSAGE *msg);
+PRIVATE void do_testflag(MESSAGE *msg);
+
+
+
+static int IsHit = 0; // 有新的键按下
+static int WaitToRead = -1; // 是否有别的进程在等着读键盘,如果无-1,如果有=进程号
 
 /*****************************************************************************
  *                                task_tty
@@ -96,6 +104,15 @@ PUBLIC void task_tty()
 		TTY* ptty = &tty_table[msg.DEVICE];
 
 		switch (msg.type) {
+		case TTY_KHIT:
+			do_khit(&msg);
+			break;
+		case TTY_GETCH:
+			do_getch(&msg);
+			break;
+		case TTY_FLAGTEST:
+			do_testflag(&msg);
+			break;
 		case DEV_OPEN:
 			reset_msg(&msg);
 			msg.type = SYSCALL_RET;
@@ -121,6 +138,27 @@ PUBLIC void task_tty()
 	}
 }
 
+
+PRIVATE void do_khit(MESSAGE *msg) {
+	int source = msg->source;
+	// k hit
+	msg->u.m1.m1i2 = IsHit;
+	IsHit = 0;
+	send_recv(SEND, source, msg);
+}
+
+PRIVATE void do_getch(MESSAGE *msg) {
+	int source = msg->source;
+	// get ch
+	WaitToRead = source;
+}
+
+PRIVATE void do_testflag(MESSAGE *msg) {
+	int source = msg->source;
+	// is pressed
+	msg->u.m1.m1i2 = IsFlag(msg->u.m1.m1i2);
+	send_recv(SEND, source, msg);
+}
 
 /*****************************************************************************
  *                                init_tty
@@ -158,6 +196,15 @@ PRIVATE void init_tty(TTY* tty)
  *****************************************************************************/
 PUBLIC void in_process(TTY* tty, u32 key)
 {
+	// 放进缓冲区
+	IsHit = 1;
+	if (WaitToRead != -1) {
+		// TODO:send
+		MESSAGE key_msg;
+		key_msg.u.m1.m1i2 = key;
+		send_recv(SEND, WaitToRead, &key_msg);
+		WaitToRead = -1;
+	}
 	if (!(key & FLAG_EXT)) {
 		put_key(tty, key);
 	}
@@ -205,6 +252,7 @@ PUBLIC void in_process(TTY* tty, u32 key)
 			// }
 			break;
 		default:
+		// 实际上是能接受到的
 			break;
 		}
 	}

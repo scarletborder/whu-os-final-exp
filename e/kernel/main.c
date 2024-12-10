@@ -199,7 +199,8 @@ void untar(const char *filename) {
 		 * 原来,这里的phdr->name是文件的名字,而不是标准的地址,即为'kernel.bin'而非'/kernel.bin'
 		 * 需要改成 "lib/get_pwd" + "filename"
 		 */
-		char *filepath = get_full_path(phdr->name);
+		char filepath[256] = "";
+		get_full_path(phdr->name, filepath);
 		printf("currently file path: %s\n", filepath);
 		int fdout = open(filepath, O_CREAT | O_RDWR);
 		if (fdout == -1) {
@@ -240,10 +241,11 @@ void shabby_shell(const char *tty_name) {
 	assert(fd_stdout == 1);
 
 	char rdbuf[128];
+	char curpath[BYTES_SHELL_WORKING_DIRECTORY];
 
-	Init_Shell();
 	while (1) {
-		write(1, Working_Directory, strlen(Working_Directory));
+		getcwd( curpath,BYTES_SHELL_WORKING_DIRECTORY);
+		write(1, curpath, strlen(curpath));
 		write(1, "$ ", 2);
 		int r    = read(0, rdbuf, 70);
 		rdbuf[r] = 0;
@@ -272,8 +274,10 @@ void shabby_shell(const char *tty_name) {
 
 		if (argc == 0)
 			continue;
-		char *full_path = get_full_path(argv[0]);
-		// printf("[shell] want to exec %s \n", full_path);
+
+		char full_path[256] = "";
+		get_full_path(argv[0], full_path);
+		printf("[shell] want to exec %s \n", full_path);
 		int fd = open(full_path, O_RDWR);
 		if (fd == -1) {
 			if (rdbuf[0]) {
@@ -314,6 +318,7 @@ void Init() {
 	assert(fd_stdout == 1);
 
 	printf("Init() is running ...\n");
+	Init_Shell("/");
 
 	/* extract `cmd.tar' */
 	untar("/cmd.tar");
