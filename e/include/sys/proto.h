@@ -60,6 +60,7 @@ PUBLIC void task_hd();
 PUBLIC void hd_handler(int irq);
 
 /* keyboard.c */
+PUBLIC int  IsFlag(int);
 PUBLIC void init_keyboard();
 PUBLIC void keyboard_read(TTY* p_tty);
 

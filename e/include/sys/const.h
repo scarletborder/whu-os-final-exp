@@ -176,6 +176,9 @@ enum msgtype {
 	/* FS & TTY */
 	SUSPEND_PROC, RESUME_PROC,
 
+	/* TTY */
+	TYPETTY,
+
 	/* MM */
 	EXEC, WAIT, TYPESHELL,
 

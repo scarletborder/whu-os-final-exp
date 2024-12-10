@@ -14,6 +14,7 @@
         "const.h": "c",
         "mdirent.h": "c",
         "keyboard.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "keywise.h": "c"
     }
 }

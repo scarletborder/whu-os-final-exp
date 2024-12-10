@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		printf("Error `ls` command only support 1 position arg at most\n");
 		return 1;
 	} else if (result.positional_count == 1) {
-		strcat(dir, result.positional_args[0]);
+		get_full_path(result.positional_args[0], dir);
 	}
 
 	// 业务
