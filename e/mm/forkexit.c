@@ -253,13 +253,6 @@ PUBLIC void do_kill(int pid)
 	} else {
 		p->p_flags = FREE_SLOT;
 	}
-	
-	// for (int i = 0; i < NR_TASKS + NR_PROCS; i++) {
-	// 	if (proc_table[i].p_flags != FREE_SLOT) { /* is a child */
-	// 		 printf("%5d %8s ", i, proc_table[i].name);
-	// 	}
-	// }
-	// cleanup(p);
 }
 
 /*****************************************************************************
