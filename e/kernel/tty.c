@@ -1,3 +1,5 @@
+// clang-format off
+
 /*************************************************************************//**
  *****************************************************************************
  * @file   kernel/tty.c
@@ -49,6 +51,8 @@
 #include "keyboard.h"
 #include "proto.h"
 
+#include "logfila.h"
+
 
 #define TTY_FIRST	(tty_table)
 #define TTY_END		(tty_table + NR_CONSOLES)
@@ -65,7 +69,7 @@ PRIVATE void do_khit(MESSAGE *msg);
 PRIVATE void do_getch(MESSAGE *msg);
 PRIVATE void do_testflag(MESSAGE *msg);
 
-
+PRIVATE void do_itsmyscreen(MESSAGE *msg);
 
 static int IsHit = 0; // 有新的键按下
 static int WaitToRead = -1; // 是否有别的进程在等着读键盘,如果无-1,如果有=进程号
@@ -113,6 +117,9 @@ PUBLIC void task_tty()
 		case TTY_FLAGTEST:
 			do_testflag(&msg);
 			break;
+		case TTY_SCRCTL:
+			do_itsmyscreen(&msg);
+			break;
 		case DEV_OPEN:
 			reset_msg(&msg);
 			msg.type = SYSCALL_RET;
@@ -138,12 +145,13 @@ PUBLIC void task_tty()
 	}
 }
 
+// clang-format on
 
 PRIVATE void do_khit(MESSAGE *msg) {
 	int source = msg->source;
 	// k hit
 	msg->u.m1.m1i2 = IsHit;
-	IsHit = 0;
+	IsHit          = 0;
 	send_recv(SEND, source, msg);
 }
 
@@ -159,6 +167,116 @@ PRIVATE void do_testflag(MESSAGE *msg) {
 	msg->u.m1.m1i2 = IsFlag(msg->u.m1.m1i2);
 	send_recv(SEND, source, msg);
 }
+
+PRIVATE void do_itsmyscreen(MESSAGE *msg) {
+	TTY *tty   = &tty_table[1];
+	int method = msg->u.m1.m1i1;
+	int arg    = msg->u.m1.m1i2;
+	int arg2   = msg->u.m1.m1i3;
+	LogFuncEntry("TTY-sc", LEVEL_INFO, "method=%d, arg=%d", method, arg);
+	CONSOLE *con = tty->console;
+	assert(con != NULL);
+	u8 *pch       = (u8 *)(V_MEM_BASE + con->cursor * 2);
+	u8 *last_line = (u8 *)(V_MEM_BASE + (con->orig + (SCR_SIZE - SCR_WIDTH)) * 2);
+
+	switch (method) {
+	case SCRCTL_SCRSET: {
+		char **srcbuf = (char **)msg->u.m3.m3p1;
+		char buf[25][80];
+		phys_copy((void *)va2la(TASK_TTY, buf), (void *)va2la(msg->source, srcbuf), 80 * 25 + 1);
+		LogFuncEntry("tty-scr", LEVEL_INFO, "%s", buf[0]);
+		for (int tcy = 0; tcy < SCR_HEIGHT - 1; tcy++) {
+			for (int tcx = 0; tcx < SCR_WIDTH; tcx++) {
+				pch    = (u8 *)(V_MEM_BASE + (con->orig + tcy * SCR_WIDTH + tcx) * 2);
+				*pch++ = (buf[tcy][tcx] ? buf[tcy][tcx] : ' ');
+				*pch   = DEFAULT_CHAR_COLOR;
+			}
+		}
+	} break;
+	case SCRCTL_PUTCH:
+		// 光标处放置字符
+		*pch++ = arg;
+		*pch++ = DEFAULT_CHAR_COLOR;
+		break;
+	case SCRCTL_SETBTM: {
+		for (int i = 0; i < SCR_WIDTH; i++) {
+			*(last_line + i * 2) = '\0';
+		}
+		if (arg == 0) {
+		} else if (arg == 1) {
+			char s[] = "--INSERT--";
+			for (int i = 0; s[i] != '\0'; i++) {
+				*(last_line + i * 2) = s[i];
+			}
+		} else if (arg == 2) {
+			char s[] = ":";
+			for (int i = 0; s[i] != '\0'; i++) {
+				*(last_line + i * 2) = s[i];
+			}
+		} else if (arg == 3) {
+			char s[] = "--NORMAL--";
+			for (int i = 0; s[i] != '\0'; i++) {
+				*(last_line + i * 2) = s[i];
+			}
+		}
+	} break;
+	case SCRCTL_PUTCH_BTM: {
+		// 找到last_line的第一个'\0'
+		int i;
+		for (i = 0; i < SCR_WIDTH; i++) {
+			if (*(last_line + i * 2) == '\0')
+				break;
+		}
+		*(last_line + i * 2)       = arg;
+		*(last_line + (i + 1) * 2) = '\0';
+	} break;
+	case SCRCTL_CUR_MV: {
+		int cursor_x = (con->cursor - con->orig) % SCR_WIDTH; // 当前光标的x坐标
+		int cursor_y = (con->cursor - con->orig) / SCR_WIDTH; // 当前光标的y坐标
+		switch (arg) {
+		case 4:
+			if (cursor_x > 0)
+				cursor_x--; // 如果不在最左边界，则向左移动
+			break;
+		case 8:
+			if (cursor_y > 0)
+				cursor_y--; // 如果不在最上边界，则向上移动
+			break;
+		case 6:
+			if (cursor_x < SCR_WIDTH - 1)
+				cursor_x++; // 如果不在最右边界，则向右移动
+			break;
+		case 2:
+		default:
+			if (cursor_y < SCR_HEIGHT - 1)
+				cursor_y++; // 如果不在最下边界，则向下移动
+			break;
+		}
+		// 更新光标的位置
+		con->cursor = con->orig + cursor_y * SCR_WIDTH + cursor_x;
+
+		// 刷新显示
+		flush_cursor(con);
+	} break;
+	case SCRCTL_CUR_SET: {
+		con->cursor = con->orig + arg2 * SCR_WIDTH + arg;
+		// 刷新显示
+		flush_cursor(con);
+	} break;
+	case SCRCTL_CLEAR:
+		con->cursor = con->orig;
+		for (int i = 0; i < SCR_SIZE; i++) {
+			out_char(tty->console, ' ');
+		}
+		con->cursor = con->orig;
+	case SCRCTL_INIT:
+	default:
+		init_tty(tty);
+		break;
+	}
+}
+
+// clang-format off
 
 /*****************************************************************************
  *                                init_tty

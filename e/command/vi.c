@@ -6,190 +6,312 @@
 
 // clang-format on
 
-#define SCR_SIZE (80 * 25)
-#define SCR_WIDTH 80
-#define SCR_HEIGHT 25
 #define MAXFILESIZEBUF 8190
+#define BUF_SIZE 8190
 
-static char buf[8192];     // 文件缓冲
-int fpos_first, fpos_last; // 文件在显示区域中显示的第一个字符在文件缓冲的偏移与最后一个字符在文件缓冲中的偏移
+// 全局变量
+char file_buf[BUF_SIZE]              = {0}; // 文件缓冲区
+char disp_buf[SCR_HEIGHT][SCR_WIDTH] = {0}; // 屏幕显示缓冲区
+int cursor_x = 0, cursor_y = 0;             // 光标位置
+int file_size  = 0;                         // 文件实际大小
+int fpos_first = 0;                         // 当前显示区域在file_buf中的第一个字符位置
+int mode       = 0;                         // 模式: 0=普通模式, 1=insert模式
 
-char disp_buf[SCR_HEIGHT][SCR_WIDTH]; // 显示区域
-int cursor_x, cursor_y;               // 光标,x 为height, y为width
+int exit_status = 0;
 
-int filesize; // 文件大小,可以被拓展但是不能超过8190
+void refresh_screen();
+void display_status();
+void update_display();
+void insert_char(int ch);
+void update_cursor();
 
-void putchar(char ch) {
-	printf("%c", ch);
-	buf[fpos_first] = ch;
-	fpos_first++;
-}
-
-// 清屏函数，打印26个换行符
-void clearScreen() {
-	for (int i = 0; i < 26; i++) {
-		printf("\n");
-	}
-}
-
-// 显示文件内容到屏幕
-void showFile() {
-	clearScreen();
-	// 计算当前显示的起始和结束位置
-	int start = fpos_first * SCR_WIDTH;
-	int end   = start + SCR_SIZE;
-	if (end > filesize) {
-		end = filesize;
-	}
-
-	// 打印显示区域的内容
-	for (int i = start; i < end; i++) {
-		putchar(buf[i]);
-		if ((i - start + 1) % SCR_WIDTH == 0) {
-			putchar('\n');
-		}
-	}
-
-	// 打印光标的位置提示
-	printf("\ncursor: line %d, col %d\n", fpos_first + cursor_x + 1, cursor_y + 1);
-}
-
-// 移动光标函数
-void moveCursor(int direction) {
-	switch (direction) {
-	case UP:
-		if (cursor_x > 0) {
-			cursor_x--;
-		} else if (fpos_first > 0) { // 向上滚动
-			fpos_first--;
-		}
-		break;
-	case DOWN:
-		if (cursor_x < SCR_HEIGHT - 1 && (fpos_first + cursor_x + 1) * SCR_WIDTH < filesize) {
-			cursor_x++;
-		} else if ((fpos_first + SCR_HEIGHT) * SCR_WIDTH < filesize) { // 向下滚动
-			fpos_first++;
-		}
-		break;
-	case LEFT:
-		if (cursor_y > 0) {
-			cursor_y--;
-		} else if (cursor_x > 0) { // 向左移动到上一行末尾
-			cursor_x--;
-			cursor_y = SCR_WIDTH - 1;
-		}
-		break;
-	case RIGHT:
-		if (cursor_y < SCR_WIDTH - 1 && (fpos_first + cursor_x) * SCR_WIDTH + cursor_y + 1 < filesize) {
-			cursor_y++;
-		} else if ((fpos_first + cursor_x + 1) * SCR_WIDTH < filesize) { // 向右移动到下一行开头
-			cursor_x++;
-			cursor_y = 0;
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-// 插入字符到缓冲区
-void insertChar(int ch) {
-	if (filesize >= MAXFILESIZEBUF) {
-		printf("\nbuffer is full\n");
-		return;
-	}
-
-	// 计算插入位置
-	int pos = (fpos_first + cursor_x) * SCR_WIDTH + cursor_y;
-	if (pos > filesize)
-		pos = filesize;
-
-	// 将后面的字符向后移动
-	memmove(&buf[pos + 1], &buf[pos], filesize - pos);
-	buf[pos] = (char)ch;
-	filesize++;
-
-	// 更新光标位置
-	cursor_y++;
-	if (cursor_y >= SCR_WIDTH) {
-		cursor_y = 0;
-		cursor_x++;
-		if (cursor_x >= SCR_HEIGHT) {
-			cursor_x = SCR_HEIGHT - 1;
-			fpos_first++;
-		}
-	}
-}
-
-// 删除当前光标位置的字符
-void deleteChar() {
-	if (filesize == 0)
-		return;
-
-	// 计算删除位置
-	int pos = (fpos_first + cursor_x) * SCR_WIDTH + cursor_y;
-	if (pos >= filesize)
-		return;
-
-	// 将后面的字符向前移动
-	memmove(&buf[pos], &buf[pos + 1], filesize - pos - 1);
-	filesize--;
-
-	// 更新光标位置
-	if (cursor_y > 0) {
-		cursor_y--;
-	} else if (cursor_x > 0) {
-		cursor_x--;
-		cursor_y = SCR_WIDTH - 1;
-	}
-}
-
-// 编辑函数
-void edit() {
-	int ch;
-	// showFile(); // 初始显示文件内容
-	// clearScreen();
-
+// 初始化屏幕
+void init_vi() {
+	memset(disp_buf, 0, sizeof(disp_buf));
+	mode       = 0;
+	cursor_x   = 0;
+	cursor_y   = 0;
+	file_size  = 0;
 	fpos_first = 0;
+	update_display();
+}
 
-	while (1) {
-		ch = _getch();
+// void dump_to_file_buf() {
+// 	int pos = 0;
 
-		if (IsExt(ch)) {
-			// 处理扩展按键
-			switch (ch) {
-			case ESC:
-				putchar('\0');
+// 	for (int y = 0; y < SCR_HEIGHT - 1; y++) {
+// 		for (int x = 0; x < SCR_WIDTH; x++) {
+// 			if (disp_buf[y][x] == 0) {
+// 				break;
+// 			}
+// 			file_buf[pos++] = disp_buf[y][x];
+// 		}
+// 		file_buf[pos++]= '\n';
+// 	}
+
+// }
+
+int cursorToPos() {
+	int ret     = fpos_first;
+	int okenter = cursor_y;
+	for (; okenter > 0 && ret < 8190; ret++) {
+		if (file_buf[ret] == '\n') {
+			okenter--;
+		}
+	}
+
+	int wid = cursor_x;
+	for (; wid > 0 && ret < 8190; ret++) {
+		wid--;
+	}
+	return ret;
+}
+
+int cursorToPosW(int cx, int cy) {
+	int ret     = fpos_first;
+	int okenter = cy;
+	for (; okenter > 0 && ret < 8190; ret++) {
+		if (file_buf[ret] == '\n') {
+			okenter--;
+		}
+	}
+
+	int wid = cx;
+	for (; wid > 0 && ret < 8190; ret++) {
+		wid--;
+	}
+	return ret;
+}
+
+// 重置显示区域
+void update_display() {
+	memset(disp_buf, 0, sizeof(disp_buf));
+	int pos = fpos_first;
+	for (int y = 0; y < SCR_HEIGHT - 1; y++) {
+		for (int x = 0; x < SCR_WIDTH; x++) {
+			if (file_buf[pos] == '\0') {
+				file_size = pos;
+				refresh_screen();
 				return;
-			case UP:
-			case DOWN:
-			case LEFT:
-			case RIGHT:
-				// moveCursor(ch);
-				// showFile();
-				// break;
-			case ENTER:
-				putchar('\n');
-				break;
-			default:
+			}
+			if (file_buf[pos] == '\n') {
+				pos++;
 				break;
 			}
-			continue;
-		} else {
-			// 处理普通字符输入
-			// if (ch == 127 || ch == 8) { // 处理删除键（Backspace）
-			// 	deleteChar();
-			// 	showFile();
-			// } else if (ch >= 32 && ch <= 126) { // 可打印字符
-			// 	insertChar(ch);
-			// 	showFile();
-			// }
-			// 可以添加更多字符处理逻辑，例如回车等
-
-			putchar((char)ch);
+			disp_buf[y][x] = file_buf[pos++];
 		}
 	}
-	buf[fpos_first] = 0;
+	refresh_screen();
+}
+
+// 刷新屏幕内容到控制台
+void refresh_screen() {
+	_scr_putscr(disp_buf);
+	display_status();
+	update_cursor();
+}
+
+// 显示状态栏 (最下面一行)
+void display_status() {
+	if (mode == 0)
+		_scr_setbottom(3);
+	else
+		_scr_setbottom(1);
+}
+
+// 更新光标位置
+void update_cursor() {
+	_scr_cursor_set(cursor_x, cursor_y);
+}
+
+void nextN(int aspect) {
+	int start = fpos_first + aspect;
+	while (start == -1 || file_buf[start] != '\n') {
+		start += aspect;
+	}
+	fpos_first = start + 1;
+}
+
+// 在insert模式中插入字符
+void insert_char(int ch) {
+	int pos = cursorToPos();
+	if (file_size >= BUF_SIZE - 1)
+		return; // 文件大小限制
+
+	if (ch == ENTER) { // ENTER键处理
+		for (int i = file_size; i > pos; i--) {
+			file_buf[i] = file_buf[i - 1];
+		}
+		file_buf[pos] = '\n';
+		file_size++;
+		cursor_x = 0;
+		cursor_y++;
+		if (cursor_y >= SCR_HEIGHT - 1) {
+			nextN(+1);
+			cursor_y--;
+		}
+	} else if (ch == BACKSPACE) { // BACKSPACE处理
+		if (pos > 0) {
+			// 删除当前位置的前一个字符
+			for (int i = pos - 1; i < file_size - 1; i++) {
+				file_buf[i] = file_buf[i + 1];
+			}
+			file_buf[file_size - 1] = '\0'; // 清除最后一个字符
+			file_size--;
+
+			if (cursor_x > 0) {
+				cursor_x--;
+			} else if (cursor_y > 0) {
+				cursor_y--;
+				cursor_x = SCR_WIDTH - 1;
+				while (cursor_x > 0 && disp_buf[cursor_y][cursor_x] == 0) {
+					cursor_x--;
+				}
+			} else if (fpos_first > 0) {
+				nextN(-1);
+				cursor_y = 0;
+				cursor_x = SCR_WIDTH - 1;
+			}
+		}
+	} else if (ch >= 32 && ch <= 126) { // 普通字符处理
+		for (int i = file_size; i > pos; i--) {
+			file_buf[i] = file_buf[i - 1];
+		}
+		file_buf[pos] = (char)ch;
+		file_size++;
+		cursor_x++;
+		if (cursor_x >= SCR_WIDTH) { // 换行处理
+			cursor_x = 0;
+			cursor_y++;
+			if (cursor_y >= SCR_HEIGHT - 1) {
+				nextN(+1);
+				cursor_y--;
+			}
+		}
+	}
+	update_display();
+	// update_cursor();
+}
+
+// 处理光标移动逻辑
+void move_cursor(char direction) {
+	switch (direction) {
+	case 'h': // 左移
+		if (cursor_x > 0)
+			cursor_x--;
+		break;
+	case 'l': // 右移
+		if (cursor_x < SCR_WIDTH - 1 && disp_buf[cursor_y][cursor_x + 1] != 0)
+			cursor_x++;
+		break;
+	case 'j': // 下移
+		if (cursor_y < SCR_HEIGHT - 2) {
+			cursor_y++;
+			if (file_buf[cursorToPos()] == '\0') { // TODO
+				cursor_y--;
+			}
+		} else if (cursor_y == SCR_HEIGHT - 2) {
+			int next_line_pos = cursorToPosW(SCR_WIDTH - 1, SCR_HEIGHT - 1);
+			while (next_line_pos < file_size && file_buf[next_line_pos] != '\n') {
+				next_line_pos++;
+			}
+			if (next_line_pos < file_size) {
+				next_line_pos++;
+				fpos_first = next_line_pos;
+				update_display();
+			}
+		}
+		break;
+	case 'k': // 上移
+		if (cursor_y > 0) {
+			cursor_y--;
+		} else if (fpos_first > 0) {
+			int prev_line_pos = fpos_first - 1;
+			while (prev_line_pos > 0 && file_buf[prev_line_pos - 1] != '\n') {
+				prev_line_pos--;
+			}
+			fpos_first = prev_line_pos;
+			update_display();
+		}
+		break;
+	}
+	update_cursor();
+}
+
+// 运行vi逻辑
+void run_vi() {
+	int ch;
+	while (1) {
+		ch = _getch();       // 获取输入字符，阻塞等待
+		if (mode == 0) {     // NORMAL模式
+			if (ch == ';') { // 示例退出命令
+				char cmd[5] = "\0\0\0\0\0";
+				int cmd_pos = 0;
+				_scr_setbottom(2); // 底线显示':'
+				int status = 0;    // 2=normal, 1=exec cmd
+
+				while (status == 0) {
+					ch = _getch();
+					if (IsExt(ch)) {
+						switch (ch) {
+						case ENTER:
+							status = 1;
+							break;
+						case ESC:
+						case BACKSPACE:
+							status = 2;
+							break;
+						default:
+							status = 0;
+							break;
+						}
+					}
+					if (status != 0) {
+						break;
+					}
+					cmd[cmd_pos++] = ch;
+					_scr_putch_bottom(ch);
+				}
+				if (status == 2) {
+					mode = 0;
+					_scr_setbottom(3); // 底线显示'normal'
+					continue;
+				} else if (status == 1) {
+					if (strcmp(cmd, "q1") == 0) {
+						exit_status = 0;
+						return;
+					} else if (strcmp(cmd, "wq") == 0) {
+						exit_status = 1;
+						return;
+					}
+					_scr_setbottom(2); // 底线显示':'
+				}
+			} else if (ch == 'h' || ch == 'j' || ch == 'k' || ch == 'l') {
+				move_cursor(ch); // 移动光标
+			} else if (ch == 'i') {
+				mode = 1; // 切换到insert模式
+				display_status();
+			} else if (ch == 'a') {
+				mode = 1; // 切换到insert模式
+				do {
+					if (file_buf[cursorToPos()] == '\0') {
+						break;
+					}
+					if (cursor_x < SCR_WIDTH - 1)
+						cursor_x++;
+				} while (0);
+
+				display_status();
+			}
+		} else if (mode == 1) { // INSERT模式
+			if (ch == ESC) {    // ESC键
+				mode = 0;       // 退回普通模式
+				display_status();
+			} else {
+				insert_char(ch);
+			}
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -205,38 +327,45 @@ int main(int argc, char *argv[]) {
 
 	if (ret != 0 || f_stat.st_mode != 0100000) {
 		printf("ERROR can not get target file or not a regular file: %s\n", filepath);
-        return 1;
+		return 1;
 	}
 
 	int fd = open(filepath, O_RDWR);
 	if (fd == 0) {
 		printf("can not open file: %s\n", filepath);
-        return 1;
+		return 1;
 	}
 
-	ret = read(fd, buf, 8190);
+	memset(file_buf, 0, 8189);
+	ret = read(fd, file_buf, 8190);
 
 	if (ret == -1) {
 		printf("ERROR can not read file: %s\n", filepath);
-        return 1;
+		return 1;
 	} else {
 		printf("read %d bytes from %s\n", ret, filepath);
 	}
 
-	filesize = strlen(buf);
+	file_size = strlen(file_buf);
+	printf("\n%d", file_size);
+	_getch();
 
-	printf("%s\nV-V-V-V-V-V\n", buf);
+	_scr_clear(); // 清屏
+	init_vi();    // 初始化vi编辑器
+	run_vi();     // 运行vi逻辑
+	_scr_init();  // 恢复初始状态
 
-	edit();
-	printf("\n---!!final!!---\n");
+	file_buf[file_size] = '\0';
 
-	lseek(fd, 0, SEEK_SET);
-	ret = write(fd, buf, fpos_first);
-	if (ret == -1) {
-		printf("ERROR can not write file: %s\n", filepath);
-        return 1;
-	} else {
-		printf("write %d bytes from %s\n", ret, filepath);
+	if (exit_status == 1) {
+		lseek(fd, 0, SEEK_SET);
+		ret = write(fd, file_buf, file_size + 1);
+		if (ret == -1) {
+			printf("ERROR can not write file: %s\n", filepath);
+			return 1;
+		} else {
+			printf("write %d bytes from %s\n", ret, filepath);
+		}
 	}
 
 	close(fd);

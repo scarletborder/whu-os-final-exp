@@ -1,6 +1,39 @@
+/**
+ * 当前tty的显示与光标操作以及键盘交互
+ */
+
 #ifndef _SCARLETBORDER_KEYWISE_H_
 #define _SCARLETBORDER_KEYWISE_H_
 
+/**
+ * 终端库函数
+ *
+ * 为一个独占屏幕应用(vi)使用专门的接口函数
+ */
+#define SCR_SIZE (80 * 25)
+#define SCR_WIDTH 80
+#define SCR_HEIGHT 25
+
+void _scr_clear();
+void _scr_init();
+void _scr_putch(int ch);
+void _scr_setbottom(int type);
+void _scr_putch_bottom(int ch);
+void _scr_cursor_move(int asp);
+void _scr_cursor_set(int cursor_x, int cursor_y);
+void _scr_putscr(char **buf);
+
+// 糖
+
+// 当到本行的最后一个字符时,换到下一行第一个
+void _scr_cursor_next_line_first();
+
+// 当到本行第一个字符时,向上到最后一个
+void _scr_cursor_prev_line_last();
+
+/**
+ * 键盘库函数
+ */
 // keyboard.c中一个变量原始为0
 // 每次正常读取键盘会设置为1
 // 用户send后,看看这个值,然后将其充值为原始0

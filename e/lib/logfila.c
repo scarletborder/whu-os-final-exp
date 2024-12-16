@@ -62,7 +62,7 @@ void AddLogWare(FunctionPointer func) {
 	if (logWareCount < MAX_LOG_WARES) {
 		logWares[logWareCount++] = func;
 	} else {
-		panic("can not add more logware");
+		// panic("can not add more logware");
 	}
 }
 
