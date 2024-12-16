@@ -138,7 +138,8 @@ PUBLIC int disklog(char * logstr)
 		if (sects_left != 0)
 			panic("sects_left should be 0, current: %d.", sects_left);
 #endif /* MEMSET_LOG_SECTS */
-	}
+
+	} // end first time
 
 	char * p = logstr;
 	int bytes_left = strlen(logstr);

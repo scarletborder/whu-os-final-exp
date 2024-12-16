@@ -1,3 +1,5 @@
+// clang-format off
+
 /*************************************************************************//**
  *****************************************************************************
  * @file   syslog.c
@@ -19,6 +21,7 @@
 #include "global.h"
 #include "proto.h"
 
+static int __log_end_pos = 0;
 
 /*****************************************************************************
  *                                syslog
@@ -42,6 +45,17 @@ PUBLIC int syslog(const char *fmt, ...)
 	i = vsprintf(buf, fmt, arg);
 	assert(strlen(buf) == i);
 
-	return disklog(buf);
+	
+	return __log_end_pos = disklog(buf);
 }
 
+
+PUBLIC int syslogWithStr(const char *str)
+{
+	return __log_end_pos = disklog(str);
+}
+
+// dmesg | tail -n 123
+PUBLIC void printLogTail(int tail){
+
+}

@@ -15,6 +15,44 @@
 #include "logfila.h"
 // clang-format on
 
+/**
+ * sync.Mutex
+ */
+
+// 定义一个静态变量作为锁
+static int mutex = 0;
+
+// 原子测试并设置的简单模拟（用在 lock 函数中）
+static inline int test_and_set(int *lock) {
+	int old_value = *lock;
+	*lock         = 1; // 设置为被锁状态
+	return old_value;  // 返回之前的值
+}
+
+// lock 函数：获取锁
+void lock() {
+	while (1) {
+		// 如果 mutex 为 0，则抢占锁（原子操作）
+		if (test_and_set(&mutex) == 0) {
+			break; // 成功获取锁，退出循环
+		}
+		// 自旋等待（模拟忙等待）
+	}
+}
+
+// unlock 函数：释放锁
+void unlock() {
+	mutex = 0; // 释放锁
+}
+
+////////////////////////////////////
+
+// 防止自己记自己,受到mutex保护
+static int __is_in_logging = 0;
+
+// 记录等级
+static int __Logging_start_level = LEVEL_TRACE;
+
 // 存储扩展日志处理组件
 static FunctionPointer logWares[MAX_LOG_WARES];
 static int logWareCount = 0;
@@ -33,6 +71,14 @@ const char *LogLevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FAT
  * @param[in] ...: 格式化字符
  */
 void LogFuncEntry(char *stage, enum LogLevels level, char *fmt, ...) {
+	lock();
+	if (__is_in_logging) {
+		unlock();
+		return;
+	}
+	__is_in_logging |= 1;
+	unlock();
+
 	if (level < LEVEL_TRACE || level > LEVEL_PANIC) {
 		printl("Invalid log level!\n");
 		return;
@@ -51,6 +97,10 @@ void LogFuncEntry(char *stage, enum LogLevels level, char *fmt, ...) {
 			logWares[i](stage, level, full_buf);
 		}
 	}
+
+	lock();
+	__is_in_logging &= 0;
+	unlock();
 }
 
 /**
@@ -62,24 +112,31 @@ void AddLogWare(FunctionPointer func) {
 	if (logWareCount < MAX_LOG_WARES) {
 		logWares[logWareCount++] = func;
 	} else {
+		// make sure we will not exceed this macro number :) XD  
 		// panic("can not add more logware");
 	}
 }
 
 void DefaultLogHandler(char *stage, enum LogLevels level, char *str) {
-	if (level >= LEVEL_TRACE)
+	if (level >= __Logging_start_level)
 		printl("{test}: %s", str);
+}
+
+void DiskLogHandler(char *stage, enum LogLevels level, char *str) {
+	if (level >= __Logging_start_level)
+		syslogWithStr(str);
 }
 
 /**
  * @brief 初始化日志处理器
  */
 void InitLogWares() {
+	__Logging_start_level = LEVEL_TRACE;
 	for (int i = 0; i < MAX_LOG_WARES; i++) {
 		logWares[i] = NULL;
 	}
 	logWareCount = 0;
-
-	// 添加默认的日志处理器（示例）
+	
 	AddLogWare(DefaultLogHandler);
+	AddLogWare(DiskLogHandler);
 }

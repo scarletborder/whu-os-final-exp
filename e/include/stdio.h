@@ -159,6 +159,8 @@ PUBLIC int stat(const char *path, struct stat *buf);
 
 /* lib/syslog.c */
 PUBLIC int syslog(const char *fmt, ...);
+PUBLIC int syslogWithStr(const char *str);
+PUBLIC void printLogTail(int tail);
 
 #endif /* _ORANGES_STDIO_H_ */
 
