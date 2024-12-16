@@ -295,7 +295,7 @@ PUBLIC void do_List_Dir() {
 	} else{
 		//正常返回
 		int length = strlen(out);
-		printl("want copy%s and l=%d\n", out, length);
+		// printl("want copy%s and l=%d\n", out, length);
 		phys_copy((void*)va2la(fs_msg.source, fs_msg.PATHNAME), /* to   */
 		  (void*)va2la(TASK_FS, out),	 /* from */
 		  length + 1);
@@ -359,9 +359,9 @@ PUBLIC int strip_path(char * filename, const char * pathname,
 			// filename[-1] = 0
 			*cur_entry_name = 0;
 			// 根据当前的entry name找inode
-			printl("{misc strip}next filename=%s\n", filename);
+			// printl("{misc strip}next filename=%s\n", filename);
 			int next_dir_inode_nr = low_search_entry(curDirInode, filename);
-			printl("{misc strip}next_node_nr=%d\n", next_dir_inode_nr);
+			// printl("{misc strip}next_node_nr=%d\n", next_dir_inode_nr);
 			if (next_dir_inode_nr == INVALID_INODE) return -1;
 			int cur_dev = curDirInode->i_dev;
 			if (IsRootDir == 0) put_inode(curDirInode); // 先前的dir不需要再引用了

@@ -1,12 +1,12 @@
-/*************************************************************************//**
- *****************************************************************************
- * @file   link.c
- * @brief  
- * @author Forrest Y. Yu
- * @date   Tue Jun  3 17:05:10 2008
- *****************************************************************************
- *****************************************************************************/
-
+/*************************************************************************/ /**
+																			 *****************************************************************************
+																			 * @file   link.c
+																			 * @brief
+																			 * @author Forrest Y. Yu
+																			 * @date   Tue Jun  3 17:05:10 2008
+																			 *****************************************************************************
+																			 *****************************************************************************/
+// clang-format off
 #include "type.h"
 #include "stdio.h"
 #include "const.h"
@@ -19,7 +19,7 @@
 #include "global.h"
 #include "keyboard.h"
 #include "proto.h"
-
+#include "logfila.h"
 
 /*****************************************************************************
  *                                do_unlink
@@ -46,14 +46,13 @@ PUBLIC int do_unlink()
 	pathname[name_len] = 0;
 
 	if (strcmp(pathname , "/") == 0) {
-		printl("{FS} FS:do_unlink():: cannot unlink the root\n");
+		LogFuncEntry("fs", LEVEL_WARN, "%s", "FS:do_unlink():: cannot unlink the root");
 		return -1;
 	}
 
 	int inode_nr = search_file(pathname); // 获取entry's inode_nr
 	if (inode_nr == INVALID_INODE) {	/* file not found */
-		printl("{FS} FS::do_unlink():: search_file() returns "
-			"invalid inode: %s\n", pathname);
+		LogFuncEntry("fs", LEVEL_WARN, "%FS::do_unlink():: search_file() returns invalid inode: %s\n", pathname);
 		return -1;
 	}
 
@@ -65,15 +64,12 @@ PUBLIC int do_unlink()
 	struct inode * pin = get_inode(dir_inode->i_dev, inode_nr);
 
 	if (pin->i_mode != I_REGULAR && pin->i_mode != I_DIRECTORY) { /* can only remove regular files or directory */
-		printl("{FS} cannot remove file %s, because "
-		       "it is not a regular file.\n",
-		       pathname);
+		LogFuncEntry("fs", LEVEL_WARN, "cannot remove file %s, because it is not a regular file.", pathname);
 		return -1;
 	}
 
 	if (pin->i_cnt > 1) {	/* the file was opened */
-		printl("{FS} cannot remove file %s, because pin->i_cnt is %d.\n",
-		       pathname, pin->i_cnt);
+		LogFuncEntry("fs", LEVEL_WARN, "cannot remove file %s, because pin->i_cnt is %d.\n", pathname, pin->i_cnt );
 		return -1;
 	}
 

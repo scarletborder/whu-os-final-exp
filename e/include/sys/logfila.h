@@ -77,4 +77,8 @@ void AddLogWare(FunctionPointer func);
 
 void InitLogWares();
 
+void DisableLOGGING();
+
+void EnableLOGGING();
+
 #endif // LOGFILA_H

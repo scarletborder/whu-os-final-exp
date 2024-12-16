@@ -18,7 +18,7 @@
 #include "console.h"
 #include "global.h"
 #include "proto.h"
-
+#include "logfila.h"
 /*****************************************************************************
  *                                open
  *****************************************************************************/
@@ -71,4 +71,12 @@ PUBLIC int mkdir(const char *pathname, int flags){
 	assert(msg.type == SYSCALL_RET);
 
 	return msg.FD;
+}
+
+void PrintLogTail_User(int tail) {
+        MESSAGE msg;
+        msg.u.m3.m3i1 = tail;
+        msg.type      = 2;
+
+        send_recv(SEND, TASK_LOGS, &msg);
 }

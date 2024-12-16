@@ -112,7 +112,7 @@ void AddLogWare(FunctionPointer func) {
 	if (logWareCount < MAX_LOG_WARES) {
 		logWares[logWareCount++] = func;
 	} else {
-		// make sure we will not exceed this macro number :) XD  
+		// make sure we will not exceed this macro number :) XD
 		// panic("can not add more logware");
 	}
 }
@@ -123,8 +123,13 @@ void DefaultLogHandler(char *stage, enum LogLevels level, char *str) {
 }
 
 void DiskLogHandler(char *stage, enum LogLevels level, char *str) {
+	MESSAGE msg;
+	msg.u.m3.m3p1 = str;
+	msg.u.m3.m3i1 = strlen(str);
+	msg.type      = 1;
+
 	if (level >= __Logging_start_level)
-		syslogWithStr(str);
+		send_recv(SEND, TASK_LOGS, &msg);
 }
 
 /**
@@ -136,7 +141,19 @@ void InitLogWares() {
 		logWares[i] = NULL;
 	}
 	logWareCount = 0;
-	
-	AddLogWare(DefaultLogHandler);
+
+	// AddLogWare(DefaultLogHandler);
 	AddLogWare(DiskLogHandler);
+}
+
+void DisableLOGGING() {
+	// lock();
+	__is_in_logging &= 1;
+	// unlock();
+}
+
+void EnableLOGGING() {
+	// lock();
+	__is_in_logging &= 0;
+	// unlock();
 }

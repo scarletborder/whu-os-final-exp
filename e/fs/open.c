@@ -84,7 +84,7 @@ PUBLIC int do_open()
 
 	struct inode * pin = 0; // first inode of this file
 	if (flags & O_CREAT) {
-		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
+		// printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
 		if (inode_nr) { // judge whether inode_nr is ZERO(INVALID), if not, means file exists 
 			printl("{FS} file exists.\n");
 			return -1;
@@ -108,7 +108,7 @@ PUBLIC int do_open()
 			return -1;
 		pin = get_inode(dir_inode->i_dev, inode_nr);
 		count_surplus_inode_link(pin); // 剩余node的引用
-		printl("sizeof pinode's point to %d\n", pin->i_size);
+		// printl("sizeof pinode's point to %d\n", pin->i_size);
 	}
 
 	if (pin) {
@@ -169,7 +169,7 @@ int do_mkdir(){
 
 	struct inode * pin = 0; // first inode of this file
 	if (flags & O_CREAT) {
-		printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
+		// printl("{fslog} %d\n", flags); // success to here, and node_nr is 0 which means really no node_nr with the name
 		if (inode_nr) {
 			printl("{FS_DIR} dir exists.\n");
 			return -1;
