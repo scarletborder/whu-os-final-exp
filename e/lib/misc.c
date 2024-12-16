@@ -23,6 +23,7 @@
 #include "keyboard.h"
 #include "proto.h"
 
+#include "logfila.h"
 /*****************************************************************************
  *                                send_recv
  *****************************************************************************/
@@ -40,8 +41,8 @@
  *****************************************************************************/
 PUBLIC int send_recv(int function, int src_dest, MESSAGE* msg)
 {
+    // LogFuncEntry("test", LEVEL_INFO, "src_dest:%d", src_dest);
 	int ret = 0;
-
 	if (function == RECEIVE)
 		memset(msg, 0, sizeof(MESSAGE));
 

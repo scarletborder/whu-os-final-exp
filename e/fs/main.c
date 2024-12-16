@@ -111,7 +111,7 @@ PUBLIC void task_fs() {
 	// TODO: 防assert
 		switch (msgtype) {
 		case UNLINK:
-			dump_fd_graph("%s just finished. (pid:%d)", msg_name[msgtype], src);
+			// dump_fd_graph("%s just finished. (pid:%d)", msg_name[msgtype], src);
 			// panic("");
 		case OPEN:
 		case CLOSE:

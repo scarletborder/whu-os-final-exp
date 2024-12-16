@@ -76,7 +76,7 @@ PUBLIC int do_open()
 	if (i >= NR_FILE_DESC)
 		panic("f_desc_table[] is full (PID:%d)", proc2pid(pcaller));
 
-	LogFuncEntry("FS-open", LEVEL_TRACE, "start to search %s, fd:%d", pathname, fd);
+	LogFuncEntry("FS-open", LEVEL_INFO, "start to search %s, fd:%d", pathname, fd);
 
 	// printl("%s\n",pathname);
 	int inode_nr = search_file(pathname);

@@ -215,7 +215,7 @@ PUBLIC int do_unlink()
 	}
 
 	
-
+	LogFuncEntry("FS-UNLINK", LEVEL_INFO, "unlink %s", pathname);
 	return 0;
 }
 

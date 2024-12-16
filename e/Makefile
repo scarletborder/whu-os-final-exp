@@ -44,7 +44,7 @@ LOBJS		=  lib/syscall.o\
 			lib/open.o lib/read.o lib/write.o lib/close.o lib/unlink.o lib/lseek.o\
 			lib/getpid.o lib/stat.o lib/getpinfo.o\
 			lib/fork.o lib/exit.o lib/wait.o lib/exec.o lib/kill.o lib/logfila.o\
-			lib/shell.o lib/dirent.o lib/cmdparser.o lib/keywise.o 
+			lib/shell.o lib/dirent.o lib/cmdparser.o lib/keywise.o lib/logfilament.o
 DASMOUTPUT	= kernel.bin.asm
 
 # All Phony Targets
@@ -238,4 +238,7 @@ fs/disklog.o: fs/disklog.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 lib/keywise.o: lib/keywise.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+lib/logfilament.o: lib/logfilament.c
 	$(CC) $(CFLAGS) -o $@ $<

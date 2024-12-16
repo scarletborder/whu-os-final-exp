@@ -72,11 +72,3 @@ PUBLIC int mkdir(const char *pathname, int flags){
 
 	return msg.FD;
 }
-
-void PrintLogTail_User(int tail) {
-        MESSAGE msg;
-        msg.u.m3.m3i1 = tail;
-        msg.type      = 2;
-
-        send_recv(SEND, TASK_LOGS, &msg);
-}

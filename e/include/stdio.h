@@ -161,7 +161,6 @@ PUBLIC int stat(const char *path, struct stat *buf);
 PUBLIC int syslog(const char *fmt, ...);
 PUBLIC int syslogWithStr(const char *str);
 PUBLIC void printLogTail(int tail);
-void PrintLogTail_User(int tail);
 
 #endif /* _ORANGES_STDIO_H_ */
 

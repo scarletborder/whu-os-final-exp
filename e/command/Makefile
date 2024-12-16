@@ -12,7 +12,7 @@ CFLAGS		= -I ../include/ -c -fno-builtin -fno-stack-protector -Wall
 LDFLAGS		= -Ttext 0x1000
 DASMFLAGS	= -D
 LIB		= ../lib/orangescrt.a
-BIN		= echo pwd ls mkdir cd touch rm vi cat ps kill
+BIN		= echo pwd ls mkdir cd touch rm vi cat ps kill dmesg
 TXTS	= maa.txt mbb.txt mcc.txt mdd.txt
 
 # All Phony Targets
@@ -119,6 +119,13 @@ cat.o: cat.c ../include/type.h ../include/stdio.h ../include/unistd.h ../include
 	$(CC) $(CFLAGS) -o $@ $<
 
 cat : cat.o start.o $(LIB)
+	$(LD) $(LDFLAGS) -o $@ $?
+
+
+dmesg.o: dmesg.c ../include/type.h ../include/stdio.h ../include/string.h ../include/cmdparser.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+dmesg : dmesg.o start.o $(LIB)
 	$(LD) $(LDFLAGS) -o $@ $?
 
 # pid.o: pid.c ../include/type.h ../include/stdio.h

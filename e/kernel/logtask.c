@@ -16,11 +16,12 @@
 // clang-format on
 
 PUBLIC void task_log() {
-	InitLogWares();
+	
 	char buf[256];
 	MESSAGE msg;
+	send_recv(RECEIVE, ANY, &msg);
+	InitLogWares();
 	while (1) {
-		send_recv(RECEIVE, ANY, &msg);
 		int type = msg.type;
 		int len  = msg.u.m3.m3i1;
 		int src  = msg.source;
@@ -31,9 +32,13 @@ PUBLIC void task_log() {
 				len + 1);
 
 			syslogWithStr(buf);
-		}else {
+		}else if (type == 2){
 			int tail = msg.u.m3.m3i1;
 			printLogTail(tail);
+		} else{
+			SwitchLogLevel(len);
 		}
+
+		send_recv(RECEIVE, ANY, &msg);
 	}
 }

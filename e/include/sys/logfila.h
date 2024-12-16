@@ -81,4 +81,5 @@ void DisableLOGGING();
 
 void EnableLOGGING();
 
+void SwitchLogLevel(int level);
 #endif // LOGFILA_H

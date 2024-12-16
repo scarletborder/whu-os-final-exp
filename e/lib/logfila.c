@@ -14,6 +14,20 @@
 
 #include "logfila.h"
 // clang-format on
+// 防止自己记自己,受到mutex保护
+static int __is_in_logging = 1;
+
+// 记录等级
+static int __Logging_start_level = LEVEL_TRACE;
+
+// 存储扩展日志处理组件
+static FunctionPointer logWares[MAX_LOG_WARES];
+static int logWareCount = 0;
+
+/**
+ * @brief 日志级别字符串
+ */
+const char *LogLevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "PANIC"};
 
 /**
  * sync.Mutex
@@ -47,21 +61,6 @@ void unlock() {
 
 ////////////////////////////////////
 
-// 防止自己记自己,受到mutex保护
-static int __is_in_logging = 0;
-
-// 记录等级
-static int __Logging_start_level = LEVEL_TRACE;
-
-// 存储扩展日志处理组件
-static FunctionPointer logWares[MAX_LOG_WARES];
-static int logWareCount = 0;
-
-/**
- * @brief 日志级别字符串
- */
-const char *LogLevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "PANIC"};
-
 /**
  * @brief 日志函数入口实现
  *
@@ -71,6 +70,9 @@ const char *LogLevelStrings[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FAT
  * @param[in] ...: 格式化字符
  */
 void LogFuncEntry(char *stage, enum LogLevels level, char *fmt, ...) {
+	if (level < __Logging_start_level) {
+		return;
+	}
 	lock();
 	if (__is_in_logging) {
 		unlock();
@@ -118,8 +120,7 @@ void AddLogWare(FunctionPointer func) {
 }
 
 void DefaultLogHandler(char *stage, enum LogLevels level, char *str) {
-	if (level >= __Logging_start_level)
-		printl("{test}: %s", str);
+	printl("{test}: %s", str);
 }
 
 void DiskLogHandler(char *stage, enum LogLevels level, char *str) {
@@ -128,19 +129,19 @@ void DiskLogHandler(char *stage, enum LogLevels level, char *str) {
 	msg.u.m3.m3i1 = strlen(str);
 	msg.type      = 1;
 
-	if (level >= __Logging_start_level)
-		send_recv(SEND, TASK_LOGS, &msg);
+	send_recv(SEND, TASK_LOGS, &msg);
 }
 
 /**
  * @brief 初始化日志处理器
  */
 void InitLogWares() {
-	__Logging_start_level = LEVEL_TRACE;
+	__Logging_start_level = LEVEL_INFO;
 	for (int i = 0; i < MAX_LOG_WARES; i++) {
 		logWares[i] = NULL;
 	}
-	logWareCount = 0;
+	logWareCount    = 0;
+	__is_in_logging = 0;
 
 	// AddLogWare(DefaultLogHandler);
 	AddLogWare(DiskLogHandler);
@@ -156,4 +157,8 @@ void EnableLOGGING() {
 	// lock();
 	__is_in_logging &= 0;
 	// unlock();
+}
+
+void SwitchLogLevel(int level) {
+	__Logging_start_level = level;
 }

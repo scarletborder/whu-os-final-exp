@@ -47,6 +47,6 @@ int main(int argc, char *argv[]) {
 
 	close(fd);
 
-	PrintLogTail_User(2048);
+	// PrintLogTail_User(2048);
 	return 0;
 }
